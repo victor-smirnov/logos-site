@@ -1,0 +1,19 @@
+{
+  "name": "logos-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Static documentation site for the Logos programming language",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --serve",
+    "clean": "rm -rf dist"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "highlight.js": "^11.11.1",
+    "markdown-it": "^14.1.0",
+    "markdown-it-anchor": "^9.2.0"
+  }
+}
