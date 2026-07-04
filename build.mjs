@@ -94,6 +94,11 @@ const md = new MarkdownIt({ html: true, linkify: true, typographer: true, highli
   .use(katexPlugin, { throwOnError: false }) // GitHub-style $...$ and $$...$$
   .use(videoEmbed);
 
+// typographer=true enables two core rules: 'smartquotes' (keep — curly quotes)
+// and 'replacements' (drop — its `+-`→± mangles "C++-class", and (c)/(tm)/--
+// substitutions are unwanted on a programming-language site).
+md.disable('replacements');
+
 // Extract an on-page table of contents from the RENDERED html — ids are then
 // guaranteed to match the anchors emitted for the headings.
 const extractToc = (html) => {
@@ -304,7 +309,8 @@ const build = () => {
     if (layout === 'post') {
       if (!data.date) console.warn(`  ! ${srcRel}: no "date" in front-matter, using today`);
       const date = data.date instanceof Date ? data.date : new Date(data.date || Date.now());
-      const readMins = Math.max(1, Math.round(content.split(/\s+/).length / 200));
+      // strip inline HTML (SVG illustrations etc.) so markup doesn't inflate read time
+      const readMins = Math.max(1, Math.round(content.replace(/<[^>]+>/g, ' ').split(/\s+/).length / 200));
       postMeta = { iso: date.toISOString().slice(0, 10), dateStr: fmtDate(date), readMins };
       posts.push({ title: data.title || 'Untitled', description: data.description || '', url, date, ...postMeta });
     }

@@ -16,6 +16,13 @@
   --code-border: #e6e8ee;
   --shadow: 0 1px 2px rgba(16, 20, 30, 0.04), 0 8px 24px rgba(16, 20, 30, 0.06);
 
+  /* diagram semantic roles (derived from the syntax palette) */
+  --dg-model: #5b4be0;
+  --dg-human: #b26a00;
+  --dg-sym: #3b6fe0;
+  --dg-ok: #2f8f4e;
+  --dg-err: #b5259e;
+
   /* syntax */
   --hl-keyword: #b5259e;
   --hl-string: #2f8f4e;
@@ -40,6 +47,7 @@
     --accent: #8f82ff; --accent-hover: #a99dff; --accent-soft: rgba(143, 130, 255, 0.14);
     --code-bg: #0c0e14; --code-border: #232a39;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.4);
+    --dg-model: #8f82ff; --dg-human: #ffb454; --dg-sym: #7aa2ff; --dg-ok: #7ee0a0; --dg-err: #ff7bd5;
     --hl-keyword: #ff7bd5; --hl-string: #7ee0a0; --hl-comment: #6b7486;
     --hl-number: #ffb454; --hl-func: #7aa2ff; --hl-type: #c3a6ff; --hl-punct: #9aa4b4;
   }
@@ -50,6 +58,7 @@
   --accent: #8f82ff; --accent-hover: #a99dff; --accent-soft: rgba(143, 130, 255, 0.14);
   --code-bg: #0c0e14; --code-border: #232a39;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.4);
+  --dg-model: #8f82ff; --dg-human: #ffb454; --dg-sym: #7aa2ff; --dg-ok: #7ee0a0; --dg-err: #ff7bd5;
   --hl-keyword: #ff7bd5; --hl-string: #7ee0a0; --hl-comment: #6b7486;
   --hl-number: #ffb454; --hl-func: #7aa2ff; --hl-type: #c3a6ff; --hl-punct: #9aa4b4;
 }
@@ -246,6 +255,13 @@ pre code { background: none; border: none; padding: 0; font-size: inherit; }
 .post-card h2 { margin: 0 0 0.4rem; font-size: 1.25rem; color: var(--text); }
 .post-card .post-meta { margin: 0 0 0.5rem; }
 .post-desc { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+
+/* ── Figures (inline SVG illustrations & diagrams) ─────────────────────── */
+figure.fig { margin: 2rem 0; }
+figure.fig svg { display: block; width: 100%; height: auto; }
+figure.fig figcaption { margin-top: 0.75rem; color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; }
+figure.fig-card { padding: 1.25rem; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+figure.fig-card figcaption { padding: 0 0.25rem; }
 
 /* ── Video embeds ──────────────────────────────────────────────────────── */
 .video-embed { margin: 1.75rem 0; aspect-ratio: 16 / 9; }
