@@ -10,8 +10,14 @@ front-matter in, templated HTML out. No framework.
 
 ```bash
 npm install
-npm run dev      # build + preview on http://localhost:4321
+npm run dev      # build + preview on http://localhost:4321, with live reload
 ```
+
+Dev mode watches `content/`, `assets/`, and `static/`: saving a file rebuilds
+the site and auto-refreshes open browser tabs (SSE — no dependencies). A build
+error (e.g. a half-saved front-matter) keeps serving the last good build and
+prints the error; the next successful save recovers automatically. Port busy?
+`PORT=4322 npm run dev`. Changes to `build.mjs` itself need a server restart.
 
 `npm run build` writes the site to `dist/`.
 

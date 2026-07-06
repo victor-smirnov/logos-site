@@ -4,7 +4,7 @@
 // Also copies assets/ and static/ verbatim. Run `node build.mjs` to build,
 // `node build.mjs --serve` to build + preview on http://localhost:4321.
 
-import { readFileSync, writeFileSync, mkdirSync, rmSync, cpSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, rmSync, cpSync, existsSync, readdirSync, statSync, watch, renameSync } from 'node:fs';
 import { dirname, join, relative, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import matter from 'gray-matter';
@@ -285,8 +285,12 @@ const fmtDate = (d) =>
   d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 
 const build = () => {
-  rmSync(OUT, { recursive: true, force: true });
-  mkdirSync(OUT, { recursive: true });
+  // Render into a temp dir and swap at the very end: a build that throws
+  // mid-way must never leave dist/ half-written — the dev server keeps
+  // serving the last good build instead.
+  const tmp = `${OUT}.tmp`;
+  rmSync(tmp, { recursive: true, force: true });
+  mkdirSync(tmp, { recursive: true });
 
   const pages = walk(CONTENT).filter((f) => f.endsWith('.md'));
   const sitemap = [];
@@ -320,7 +324,7 @@ const build = () => {
         ? `<h1 class="doc-title">${esc(data.title)}</h1>\n${rendered}`
         : rendered;
     const html = page({ title: data.title || SITE.title, description: data.description, url, layout, body, toc, postMeta });
-    const dest = join(OUT, outFile);
+    const dest = join(tmp, outFile);
     mkdirSync(dirname(dest), { recursive: true });
     writeFileSync(dest, html);
     if (indexable) sitemap.push(url);
@@ -348,9 +352,9 @@ ${posts
   )
   .join('\n')}
 </ul>`;
-  mkdirSync(join(OUT, 'blog'), { recursive: true });
+  mkdirSync(join(tmp, 'blog'), { recursive: true });
   writeFileSync(
-    join(OUT, 'blog/index.html'),
+    join(tmp, 'blog/index.html'),
     page({ title: 'Blog', description: blogDesc, url: '/blog/', layout: 'blog-index', body: indexBody, toc: [] })
   );
   sitemap.push('/blog/');
@@ -369,7 +373,7 @@ ${posts
     )
     .join('\n');
   writeFileSync(
-    join(OUT, 'blog/rss.xml'),
+    join(tmp, 'blog/rss.xml'),
     `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
 <channel>
@@ -384,13 +388,13 @@ ${rssItems}
   console.log('  (generated)  →  blog/rss.xml');
 
   // Static passthrough + assets.
-  if (existsSync(ASSETS)) cpSync(ASSETS, join(OUT, 'assets'), { recursive: true });
-  if (existsSync(STATIC)) cpSync(STATIC, OUT, { recursive: true });
+  if (existsSync(ASSETS)) cpSync(ASSETS, join(tmp, 'assets'), { recursive: true });
+  if (existsSync(STATIC)) cpSync(STATIC, tmp, { recursive: true });
 
   // Self-hosted KaTeX CSS + fonts (referenced only by pages that use math).
   const katexDist = join(ROOT, 'node_modules/katex/dist');
-  cpSync(join(katexDist, 'katex.min.css'), join(OUT, 'assets/katex/katex.min.css'));
-  cpSync(join(katexDist, 'fonts'), join(OUT, 'assets/katex/fonts'), { recursive: true });
+  cpSync(join(katexDist, 'katex.min.css'), join(tmp, 'assets/katex/katex.min.css'));
+  cpSync(join(katexDist, 'fonts'), join(tmp, 'assets/katex/fonts'), { recursive: true });
 
   // sitemap.xml
   const urlset = sitemap
@@ -398,32 +402,109 @@ ${rssItems}
     .map((u) => `  <url><loc>${SITE.url}${u}</loc></url>`)
     .join('\n');
   writeFileSync(
-    join(OUT, 'sitemap.xml'),
+    join(tmp, 'sitemap.xml'),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urlset}\n</urlset>\n`
   );
+
+  // Everything rendered — swap the new build in.
+  rmSync(OUT, { recursive: true, force: true });
+  renameSync(tmp, OUT);
 
   console.log(`\n✓ Built ${pages.length} page(s) → dist/`);
 };
 
-// ── Optional dev server ─────────────────────────────────────────────────────
+// ── Dev mode (--serve): serve dist/, watch sources, live-reload ─────────────
+// Browsers subscribe to /__reload (SSE); every successful rebuild broadcasts a
+// reload event. The client script is injected at SERVE time only — files on
+// disk in dist/ stay identical to what CI deploys.
+const sseClients = new Set();
+const notifyReload = () => {
+  for (const c of sseClients) {
+    try { c.write('event: reload\ndata: 1\n\n'); } catch { sseClients.delete(c); }
+  }
+};
+
+const devReloadScript = `<script>(function(){new EventSource('/__reload').addEventListener('reload',function(){location.reload()})})();</script>`;
+
+const rebuild = (reason) => {
+  console.log(`\n↻ ${reason} — rebuilding…`);
+  try {
+    build();
+    notifyReload();
+  } catch (e) {
+    console.error(`✗ build failed — still serving the last good build: ${e.message}`);
+  }
+};
+
+const watchSources = () => {
+  let timer; // one shared debounce: a multi-file save triggers a single rebuild
+  const onChange = (dir) => (_evt, fname) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => rebuild(`${relative(ROOT, dir)}/${fname ?? ''} changed`), 120);
+  };
+  for (const dir of [CONTENT, ASSETS, STATIC]) {
+    if (existsSync(dir)) watch(dir, { recursive: true }, onChange(dir));
+  }
+  // The generator itself can't hot-swap into a running process.
+  watch(fileURLToPath(import.meta.url), () => {
+    console.log('! build.mjs changed — restart the dev server (Ctrl+C, npm run dev) to pick it up');
+  });
+};
+
 const serve = async () => {
   const { createServer } = await import('node:http');
   const mime = {
     '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript',
     '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.json': 'application/json',
     '.woff2': 'font/woff2', '.ico': 'image/x-icon', '.txt': 'text/plain; charset=utf-8',
+    '.xml': 'application/xml',
   };
-  const port = 4321;
-  createServer((req, res) => {
-    let p = decodeURIComponent(req.url.split('?')[0]);
+  const port = Number(process.env.PORT || process.argv.find((a) => a.startsWith('--port='))?.slice(7) || 4321);
+  const server = createServer((req, res) => {
+    const p = decodeURIComponent(req.url.split('?')[0]);
+    if (p === '/__reload') {
+      res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' });
+      res.write('retry: 500\n\n');
+      sseClients.add(res);
+      req.on('close', () => sseClients.delete(res));
+      return;
+    }
     let file = join(OUT, p);
     if (existsSync(file) && statSync(file).isDirectory()) file = join(file, 'index.html');
     if (!existsSync(file)) file = join(OUT, p, 'index.html');
-    if (!existsSync(file)) { res.writeHead(404); res.end('Not found'); return; }
-    res.writeHead(200, { 'content-type': mime[extname(file)] || 'application/octet-stream' });
+    let status = 200;
+    if (!existsSync(file)) {
+      file = join(OUT, '404.html');
+      status = 404;
+      if (!existsSync(file)) { res.writeHead(404); res.end('Not found'); return; }
+    }
+    if (file.endsWith('.html')) {
+      const html = readFileSync(file, 'utf8').replace('</body>', `${devReloadScript}</body>`);
+      res.writeHead(status, { 'content-type': 'text/html; charset=utf-8' });
+      res.end(html);
+      return;
+    }
+    res.writeHead(status, { 'content-type': mime[extname(file)] || 'application/octet-stream' });
     res.end(readFileSync(file));
-  }).listen(port, () => console.log(`\n➜  Preview: http://localhost:${port}`));
+  });
+  server.on('error', (e) => {
+    if (e.code === 'EADDRINUSE') {
+      console.error(`✗ port ${port} is busy — another dev server running? Try: PORT=${port + 1} npm run dev`);
+      process.exit(1);
+    }
+    throw e;
+  });
+  server.listen(port, () => console.log(`\n➜  Preview: http://localhost:${port}  (watching content/, assets/, static/)`));
 };
 
-build();
-if (process.argv.includes('--serve')) await serve();
+if (process.argv.includes('--serve')) {
+  try {
+    build();
+  } catch (e) {
+    console.error(`✗ initial build failed: ${e.message}`); // keep serving; fix + save triggers rebuild
+  }
+  watchSources();
+  await serve();
+} else {
+  build();
+}
