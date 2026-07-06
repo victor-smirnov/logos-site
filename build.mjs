@@ -12,6 +12,7 @@ import MarkdownIt from 'markdown-it';
 import anchor from 'markdown-it-anchor';
 import hljs from 'highlight.js';
 import katexModule from '@vscode/markdown-it-katex';
+import { buildApiPages } from './apidocs.mjs';
 
 // CJS/ESM interop: the plugin function may sit one or two `.default` levels deep.
 const katexPlugin = katexModule.default?.default ?? katexModule.default ?? katexModule;
@@ -20,6 +21,7 @@ const ROOT = dirname(fileURLToPath(import.meta.url));
 const CONTENT = join(ROOT, 'content');
 const ASSETS = join(ROOT, 'assets');
 const STATIC = join(ROOT, 'static');
+const DATA_API = join(ROOT, 'data/api');
 const OUT = join(ROOT, 'dist');
 
 // ── Site configuration ──────────────────────────────────────────────────────
@@ -167,6 +169,7 @@ const header = (currentUrl) => `
     <a class="brand" href="/"><span class="brand-mark">Λ</span><span class="brand-name">Logos</span></a>
     <nav class="top-nav">
       <a href="/docs/getting-started/"${currentUrl.startsWith('/docs/') ? ' class="active"' : ''}>Docs</a>
+      <a href="/api/"${currentUrl.startsWith('/api/') ? ' class="active"' : ''}>Stdlib</a>
       <a href="/blog/"${currentUrl.startsWith('/blog') ? ' class="active"' : ''}>Blog</a>
       <a href="${SITE.repo}" rel="noopener">GitHub</a>
     </nav>
@@ -222,7 +225,7 @@ const footer = () => `
   </div>
 </footer>`;
 
-const page = ({ title, description, url, layout, body, toc, postMeta }) => {
+const page = ({ title, description, url, layout, body, toc, postMeta, sidebarHtml }) => {
   const fullTitle = url === '/' ? `${SITE.title} — ${SITE.tagline}` : `${esc(title)} · ${SITE.title}`;
   const desc = esc(description || SITE.tagline);
   // KaTeX renders at build time; ship its CSS only on pages that used math.
@@ -242,10 +245,68 @@ ${body}
   } else if (layout === 'blog-index') {
     main = `<main class="post-main">${body}</main>`;
   } else {
+    // 'doc' uses the SITE.nav sidebar; 'api' brings its own (namespaces).
+    // The inline script right after the sidebar restores its scroll position
+    // BEFORE first paint (every click is a full navigation, which would
+    // otherwise reset the list to the top); keyed per section so /docs and
+    // /api remember independent positions. Fresh entries (deep link, search)
+    // center the active item instead.
     main = `<div class="doc-shell">
-${sidebar(url)}
+${sidebarHtml ?? sidebar(url)}
+<div class="sb-resizer" aria-hidden="true" title="Drag to resize · double-click to reset"></div>
+<script>(function(){
+var sb=document.querySelector('.sidebar');if(!sb)return;
+var sec=location.pathname.split('/')[1];
+var key='sb-scroll:'+sec,wkey='sb-width:'+sec;
+// restore user-chosen width (localStorage) and scroll position (sessionStorage)
+// synchronously, before first paint
+function setW(px){sb.style.width=px+'px';sb.style.maxWidth='none';sb.style.flex='0 0 auto';}
+try{var w=localStorage.getItem(wkey);if(w)setW(+w);}catch(e){}
+try{
+var saved=sessionStorage.getItem(key);
+if(saved!==null){sb.scrollTop=+saved;}
+else{var a=sb.querySelector('.sidebar-nav a.active');if(a)sb.scrollTop=Math.max(0,a.offsetTop-sb.clientHeight/2);}
+}catch(e){}
+sb.addEventListener('scroll',function(){try{sessionStorage.setItem(key,sb.scrollTop)}catch(e){}},{passive:true});
+// full-name tooltip for truncated entries — custom (500ms; native title delay
+// is ~1s and not tunable). Truncation is checked at hover time.
+var tipEl=null,tipTimer=null;
+function showTip(a){
+if(!tipEl){tipEl=document.createElement('div');tipEl.className='sb-tip';document.body.appendChild(tipEl);}
+tipEl.textContent=a.textContent.trim();
+tipEl.style.display='block';
+var r=a.getBoundingClientRect();
+tipEl.style.left=Math.max(8,Math.min(r.left+8,innerWidth-tipEl.offsetWidth-8))+'px';
+tipEl.style.top=(r.bottom+4)+'px';
+}
+function hideTip(){clearTimeout(tipTimer);tipTimer=null;if(tipEl)tipEl.style.display='none';}
+sb.addEventListener('mouseover',function(e){
+var a=e.target.closest('.sidebar-nav a');if(!a)return;
+if(a.scrollWidth<=a.clientWidth+1)return;
+clearTimeout(tipTimer);
+tipTimer=setTimeout(function(){showTip(a)},500);
+});
+sb.addEventListener('mouseout',function(e){if(e.target.closest('.sidebar-nav a'))hideTip();});
+sb.addEventListener('scroll',hideTip,{passive:true});
+document.addEventListener('click',hideTip,true);
+// drag-to-resize; double-click resets to auto width
+var rz=document.querySelector('.sb-resizer');
+if(rz){
+rz.addEventListener('pointerdown',function(e){
+e.preventDefault();rz.setPointerCapture(e.pointerId);rz.classList.add('dragging');
+document.body.style.userSelect='none';
+var left=sb.getBoundingClientRect().left;
+function mv(ev){setW(Math.min(Math.max(ev.clientX-left,180),Math.floor(innerWidth*0.5)));}
+function up(){rz.classList.remove('dragging');document.body.style.userSelect='';
+rz.removeEventListener('pointermove',mv);rz.removeEventListener('pointerup',up);
+try{localStorage.setItem(wkey,Math.round(sb.getBoundingClientRect().width))}catch(e2){}}
+rz.addEventListener('pointermove',mv);rz.addEventListener('pointerup',up);
+});
+rz.addEventListener('dblclick',function(){sb.style.width='';sb.style.maxWidth='';sb.style.flex='';try{localStorage.removeItem(wkey)}catch(e){}});
+}
+})();</script>
 <main class="doc-main">
-<article class="doc-content">
+<article class="doc-content${layout === 'api' ? ' api-content' : ''}">
 ${body}
 </article>
 ${tocAside(toc)}
@@ -267,7 +328,7 @@ ${tocAside(toc)}
 <meta property="og:url" content="${SITE.url}${url}">
 <link rel="alternate" type="application/rss+xml" title="${SITE.title} Blog" href="/blog/rss.xml">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/styles.css">${katexCss}
+<link rel="stylesheet" href="/assets/styles.css">${katexCss}${layout === 'api' ? '\n<script src="/assets/api-search.js" defer></script>' : ''}
 <script>${themeBoot}</script>
 </head>
 <body class="layout-${layout}">
@@ -387,6 +448,28 @@ ${rssItems}
   );
   console.log('  (generated)  →  blog/rss.xml');
 
+  // API reference (from data/api/*.json — see logos/docs/tooling/docs-json.md).
+  const api = buildApiPages(DATA_API);
+  for (const p of api.pages) {
+    const html = page({
+      title: p.title,
+      description: p.description,
+      url: p.url,
+      layout: 'api',
+      body: p.body,
+      toc: p.toc,
+      sidebarHtml: api.sidebar(p.url),
+    });
+    const dest = join(tmp, p.outFile);
+    mkdirSync(dirname(dest), { recursive: true });
+    writeFileSync(dest, html);
+    sitemap.push(p.url);
+  }
+  if (api.pages.length) {
+    writeFileSync(join(tmp, 'api/search-index.json'), JSON.stringify(api.searchIndex));
+    console.log(`  (generated)  →  api/ (${api.pages.length} pages + search index)`);
+  }
+
   // Static passthrough + assets.
   if (existsSync(ASSETS)) cpSync(ASSETS, join(tmp, 'assets'), { recursive: true });
   if (existsSync(STATIC)) cpSync(STATIC, tmp, { recursive: true });
@@ -409,28 +492,32 @@ ${rssItems}
   // Everything rendered — swap the new build in.
   rmSync(OUT, { recursive: true, force: true });
   renameSync(tmp, OUT);
+  buildSerial++;
 
   console.log(`\n✓ Built ${pages.length} page(s) → dist/`);
 };
 
 // ── Dev mode (--serve): serve dist/, watch sources, live-reload ─────────────
-// Browsers subscribe to /__reload (SSE); every successful rebuild broadcasts a
-// reload event. The client script is injected at SERVE time only — files on
-// disk in dist/ stay identical to what CI deploys.
-const sseClients = new Set();
-const notifyReload = () => {
-  for (const c of sseClients) {
-    try { c.write('event: reload\ndata: 1\n\n'); } catch { sseClients.delete(c); }
-  }
-};
+// Live reload is POLLING, deliberately not SSE/WebSocket: a persistent
+// connection per page is retained by Chrome's back/forward cache, so ~5
+// sidebar clicks exhausted the browser's 6-connections-per-origin pool and
+// the next navigation stalled for tens of seconds. Short-lived /__version
+// fetches (1/s, visible tabs only) cannot starve the pool by construction.
+// The client script is injected at SERVE time only — files on disk in dist/
+// stay identical to what CI deploys.
+let buildSerial = 0; // bumped after every successful build()
 
-const devReloadScript = `<script>(function(){new EventSource('/__reload').addEventListener('reload',function(){location.reload()})})();</script>`;
+const devReloadScript = () => `<script>(function(){
+var v0=${buildSerial};
+function check(){fetch('/__version',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){if(d.v!==v0)location.reload()}).catch(function(){})}
+setInterval(function(){if(!document.hidden)check()},1000);
+window.addEventListener('pageshow',function(e){if(e.persisted)check()});
+})();</script>`;
 
 const rebuild = (reason) => {
   console.log(`\n↻ ${reason} — rebuilding…`);
   try {
     build();
-    notifyReload();
   } catch (e) {
     console.error(`✗ build failed — still serving the last good build: ${e.message}`);
   }
@@ -442,7 +529,7 @@ const watchSources = () => {
     clearTimeout(timer);
     timer = setTimeout(() => rebuild(`${relative(ROOT, dir)}/${fname ?? ''} changed`), 120);
   };
-  for (const dir of [CONTENT, ASSETS, STATIC]) {
+  for (const dir of [CONTENT, ASSETS, STATIC, DATA_API]) {
     if (existsSync(dir)) watch(dir, { recursive: true }, onChange(dir));
   }
   // The generator itself can't hot-swap into a running process.
@@ -462,11 +549,9 @@ const serve = async () => {
   const port = Number(process.env.PORT || process.argv.find((a) => a.startsWith('--port='))?.slice(7) || 4321);
   const server = createServer((req, res) => {
     const p = decodeURIComponent(req.url.split('?')[0]);
-    if (p === '/__reload') {
-      res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' });
-      res.write('retry: 500\n\n');
-      sseClients.add(res);
-      req.on('close', () => sseClients.delete(res));
+    if (p === '/__version') {
+      res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+      res.end(JSON.stringify({ v: buildSerial }));
       return;
     }
     let file = join(OUT, p);
@@ -479,7 +564,7 @@ const serve = async () => {
       if (!existsSync(file)) { res.writeHead(404); res.end('Not found'); return; }
     }
     if (file.endsWith('.html')) {
-      const html = readFileSync(file, 'utf8').replace('</body>', `${devReloadScript}</body>`);
+      const html = readFileSync(file, 'utf8').replace('</body>', `${devReloadScript()}</body>`);
       res.writeHead(status, { 'content-type': 'text/html; charset=utf-8' });
       res.end(html);
       return;

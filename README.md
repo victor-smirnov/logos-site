@@ -95,6 +95,25 @@ Another paragraph.
 `youtu.be/...` short links and `vimeo.com/...` work too. A URL inside a
 sentence stays a normal link.
 
+## Standard-library API reference
+
+`/api/` is generated from `data/api/*.json` — machine-readable docs the Logos
+toolchain extracts from stdlib doc comments (format spec:
+`logos/docs/tooling/docs-json.md`, `schema_version: 1`). The renderer is
+[`apidocs.mjs`](apidocs.mjs); client-side search lives in
+[`assets/api-search.js`](assets/api-search.js) over a build-time index.
+
+**Regenerating the data is a local, explicit step** — CI has no Logos
+toolchain and only renders the committed JSON:
+
+```bash
+npm run api:extract   # needs a built toolchain; set LOGOS_REPO if not ~/devel/logos
+git add data/api && git commit
+```
+
+Run it whenever stdlib doc comments or signatures change, review the diff,
+and commit the updated JSON like any other content.
+
 ## Deployment
 
 Every push to `main` triggers `.github/workflows/deploy.yml`, which builds the

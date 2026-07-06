@@ -157,8 +157,28 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
 /* ── Doc shell (sidebar / content / toc) ───────────────────────────────── */
 .doc-shell { max-width: 1240px; margin: 0 auto; display: flex; align-items: flex-start; }
 .sidebar {
-  position: sticky; top: var(--header-h); flex: 0 0 var(--sidebar-w); width: var(--sidebar-w);
+  position: sticky; top: var(--header-h);
+  /* size to the longest entry, between the classic 250px and a hard cap */
+  flex: 0 1 auto; width: max-content; min-width: var(--sidebar-w); max-width: 22rem;
   height: calc(100vh - var(--header-h)); overflow-y: auto; padding: 2rem 1rem 2rem 1.25rem;
+}
+/* API pages: long dotted namespaces — give the shell (and header) more room */
+.layout-api .doc-shell, .layout-api .header-inner { max-width: 1400px; }
+
+/* drag handle between sidebar and content */
+.sb-resizer {
+  flex: 0 0 6px; align-self: stretch; cursor: col-resize;
+  position: sticky; top: var(--header-h); height: calc(100vh - var(--header-h));
+  border-left: 1px solid var(--border); transition: background 0.15s;
+}
+.sb-resizer:hover, .sb-resizer.dragging { background: var(--accent-soft); border-left-color: var(--accent); }
+
+/* custom sidebar tooltip (500ms — native title delay is not tunable) */
+.sb-tip {
+  position: fixed; z-index: 100; display: none; pointer-events: none;
+  padding: 0.3rem 0.6rem; border-radius: 7px; white-space: nowrap;
+  background: var(--surface); color: var(--text); border: 1px solid var(--border);
+  box-shadow: var(--shadow); font-family: var(--font-mono); font-size: 0.78rem;
 }
 .nav-group { margin-bottom: 1.5rem; }
 .nav-group-title { margin: 0 0 0.5rem; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); }
@@ -166,7 +186,9 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
 .sidebar-nav li a {
   display: block; padding: 0.35rem 0.7rem; margin: 0.1rem 0; border-radius: 7px;
   color: var(--text-muted); font-size: 0.92rem; border-left: 2px solid transparent;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+.sidebar-nav li a code { background: none; border: none; padding: 0; font-size: 0.86em; }
 .sidebar-nav li a:hover { color: var(--text); background: var(--surface-2); text-decoration: none; }
 .sidebar-nav li a.active { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
 
@@ -274,6 +296,74 @@ figure.fig-card figcaption { padding: 0 0.25rem; }
 .katex { font-size: 1.06em; }
 .katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.25rem 0.1rem; }
 
+/* ── API reference ─────────────────────────────────────────────────────── */
+.api-content { max-width: 860px; }
+.api-title code { background: none; border: none; padding: 0; font-size: 0.9em; }
+.api-module-note { color: var(--text-muted); font-size: 0.9rem; margin: -0.75rem 0 1.5rem; }
+
+.api-item { margin: 0 0 2rem; padding: 1.1rem 1.25rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.api-item-head { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 0.75rem; font-size: 1.15rem; }
+.api-item-head a { color: var(--text); }
+.api-item-head a:hover { color: var(--accent); text-decoration: none; }
+
+.api-kind {
+  flex: none; padding: 0.1rem 0.5rem; border-radius: 6px;
+  font-family: var(--font-mono); font-size: 0.7rem; font-weight: 600; line-height: 1.4;
+  background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border);
+}
+.api-kind-trait { color: var(--hl-type); border-color: color-mix(in srgb, var(--hl-type) 35%, transparent); }
+.api-kind-struct, .api-kind-union { color: var(--hl-func); border-color: color-mix(in srgb, var(--hl-func) 35%, transparent); }
+.api-kind-enum { color: var(--hl-keyword); border-color: color-mix(in srgb, var(--hl-keyword) 35%, transparent); }
+.api-kind-fn, .api-kind-method { color: var(--hl-string); border-color: color-mix(in srgb, var(--hl-string) 35%, transparent); }
+.api-kind-field, .api-kind-variant { color: var(--hl-number); border-color: color-mix(in srgb, var(--hl-number) 35%, transparent); }
+
+.api-sig { margin: 0.5rem 0; padding: 0.6rem 0.9rem; font-size: 0.84rem; }
+.api-doc { font-size: 0.95rem; }
+.api-doc > :first-child { margin-top: 0.5rem; }
+.api-doc > :last-child { margin-bottom: 0.25rem; }
+
+.api-xref { margin: 0.6rem 0 0.2rem; font-size: 0.88rem; color: var(--text-muted); }
+.api-xref-label { margin-right: 0.25rem; }
+.api-chip { display: inline-block; margin: 0.1rem 0.15rem 0.1rem 0; }
+.api-chip code { font-size: 0.8rem; }
+.api-chip:hover { text-decoration: none; }
+.api-chip:hover code { border-color: var(--accent); color: var(--accent); }
+
+.api-member-group { margin: 1.1rem 0 0.4rem; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); }
+.api-member { padding: 0.35rem 0 0.35rem 0.9rem; border-left: 2px solid var(--border); margin: 0.35rem 0; }
+.api-member .api-sig { margin: 0; }
+.api-member:target, .api-item:target { border-color: var(--accent); }
+
+.api-ns-list { list-style: none; padding: 0; margin: 0.75rem 0 2rem; columns: 2; column-gap: 2rem; }
+.api-ns-list li { margin: 0.25rem 0; break-inside: avoid; }
+.api-ns-count { color: var(--text-muted); font-size: 0.8rem; }
+
+/* API search */
+.api-search { position: relative; margin: 0 0 1.25rem; }
+.api-search input {
+  width: 100%; padding: 0.5rem 0.75rem; font-size: 0.9rem;
+  color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+}
+.api-search input:focus { outline: none; border-color: var(--accent); }
+#api-search-results {
+  position: absolute; z-index: 60; top: calc(100% + 4px); left: 0;
+  width: 330px; max-width: 76vw; max-height: 340px; overflow-y: auto;
+  list-style: none; margin: 0; padding: 0.3rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow);
+}
+#api-search-results li a {
+  display: flex; align-items: baseline; gap: 0.5rem; padding: 0.4rem 0.55rem;
+  border-radius: 7px; color: var(--text); font-size: 0.85rem;
+}
+#api-search-results li a:hover, #api-search-results li a.selected { background: var(--accent-soft); text-decoration: none; }
+.api-search-name { font-family: var(--font-mono); font-size: 0.82rem; white-space: nowrap; }
+.api-search-path { color: var(--text-muted); font-size: 0.72rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.api-search-empty { padding: 0.5rem 0.6rem; color: var(--text-muted); font-size: 0.85rem; }
+
+@media (max-width: 700px) {
+  .api-ns-list { columns: 1; }
+}
+
 /* ── Mobile nav ────────────────────────────────────────────────────────── */
 .nav-scrim { display: none; }
 
@@ -291,6 +381,7 @@ figure.fig-card figcaption { padding: 0 0.25rem; }
     transition: transform 0.2s ease;
   }
   body.nav-open .sidebar { transform: translateX(0); box-shadow: var(--shadow); }
+  .sb-resizer { display: none; }
   body.nav-open .nav-scrim { display: block; position: fixed; inset: var(--header-h) 0 0 0; z-index: 30; background: rgba(0,0,0,0.4); }
   .hero { padding: 3rem 0 2rem; }
 }
