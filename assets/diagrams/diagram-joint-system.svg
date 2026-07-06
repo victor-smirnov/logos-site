@@ -1,0 +1,77 @@
+<svg id="lg-joint" viewBox="0 0 860 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three agents — model, human, and deterministic programs — exchange proposals, steering, artifacts, and diagnostics around one joint dynamics.">
+  <style>
+    #lg-joint text     { font-size: 13px; fill: var(--text, #1c2230); }
+    #lg-joint .h       { font-size: 17px; font-weight: 700; }
+    #lg-joint .sub     { font-size: 11.5px; font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
+    #lg-joint .body    { font-size: 12.5px; fill: var(--text-muted, #5b6472); }
+    #lg-joint .lbl     { font-size: 11px; font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
+    #lg-joint .box     { fill: var(--surface, #ffffff); stroke-width: 1.5; }
+    #lg-joint .arr     { fill: none; stroke-width: 1.75; }
+    #lg-joint .c-model { stroke: var(--dg-model, #5b4be0); }
+    #lg-joint .c-human { stroke: var(--dg-human, #b26a00); }
+    #lg-joint .c-sym   { stroke: var(--dg-sym, #3b6fe0); }
+    #lg-joint .t-model { fill: var(--dg-model, #5b4be0); }
+    #lg-joint .t-human { fill: var(--dg-human, #b26a00); }
+    #lg-joint .t-sym   { fill: var(--dg-sym, #3b6fe0); }
+    #lg-joint .core    { fill: var(--accent, #5b4be0); fill-opacity: 0.08; stroke: var(--text-muted, #5b6472); stroke-width: 1.2; stroke-dasharray: 5 5; }
+    #lg-joint .mkf-model { fill: var(--dg-model, #5b4be0); }
+    #lg-joint .mkf-human { fill: var(--dg-human, #b26a00); }
+    #lg-joint .mkf-sym   { fill: var(--dg-sym, #3b6fe0); }
+  </style>
+  <defs>
+    <marker id="mk-model" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse">
+      <path class="mkf-model" d="M0,0 L8,4 L0,8 Z"/>
+    </marker>
+    <marker id="mk-human" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse">
+      <path class="mkf-human" d="M0,0 L8,4 L0,8 Z"/>
+    </marker>
+    <marker id="mk-sym" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse">
+      <path class="mkf-sym" d="M0,0 L8,4 L0,8 Z"/>
+    </marker>
+  </defs>
+
+  <!-- Model -->
+  <rect class="box c-model" x="60" y="70" width="230" height="118" rx="12"/>
+  <text class="h" x="84" y="104">Model</text>
+  <text class="sub t-model" x="84" y="127">stochastic · p(y | x)</text>
+  <text class="body" x="84" y="151">proposes: code, fixes, tests —</text>
+  <text class="body" x="84" y="169">cheap, plausible, unguaranteed</text>
+
+  <!-- Human -->
+  <rect class="box c-human" x="570" y="70" width="230" height="118" rx="12"/>
+  <text class="h" x="594" y="104">Human</text>
+  <text class="sub t-human" x="594" y="127">responsibility · intent</text>
+  <text class="body" x="594" y="151">owns goals and invariants,</text>
+  <text class="body" x="594" y="169">reviews and signs the work</text>
+
+  <!-- Deterministic programs -->
+  <rect class="box c-sym" x="295" y="380" width="270" height="118" rx="12"/>
+  <text class="h" x="319" y="414">Deterministic programs</text>
+  <text class="sub t-sym" x="319" y="437">compiler · tests · solvers · CI</text>
+  <text class="body" x="319" y="461">compute what models can’t,</text>
+  <text class="body" x="319" y="479">cache results, constrain trajectories</text>
+
+  <!-- Joint dynamics -->
+  <rect class="core" x="345" y="240" width="170" height="66" rx="33"/>
+  <text class="sub" x="430" y="268" text-anchor="middle" style="font-size: 13.5px">X<tspan dy="3.5" style="font-size: 9.5px">n+1</tspan><tspan dy="-3.5"> = F(X</tspan><tspan dy="3.5" style="font-size: 9.5px">n</tspan><tspan dy="-3.5">)</tspan></text>
+  <text class="body" x="430" y="290" text-anchor="middle" style="font-size: 11px">joint dynamics</text>
+
+  <!-- Model ⇄ Human -->
+  <path class="arr c-model" d="M302,112 L556,112" marker-end="url(#mk-model)"/>
+  <text class="lbl t-model" x="429" y="100" text-anchor="middle">proposals · explanations</text>
+  <path class="arr c-human" d="M558,150 L304,150" marker-end="url(#mk-human)"/>
+  <text class="lbl t-human" x="429" y="170" text-anchor="middle">steering · ΔX</text>
+
+  <!-- Model ⇄ Deterministic -->
+  <path class="arr c-model" d="M205,190 C 235,262 285,325 345,372" marker-end="url(#mk-model)"/>
+  <text class="lbl t-model" x="316" y="330">artifacts</text>
+  <path class="arr c-sym" d="M320,376 C 262,328 210,265 178,192" marker-end="url(#mk-sym)"/>
+  <text class="lbl t-sym" x="60" y="300">structured</text>
+  <text class="lbl t-sym" x="60" y="316">diagnostics</text>
+
+  <!-- Human ⇄ Deterministic -->
+  <path class="arr c-human" d="M655,190 C 625,262 575,325 515,372" marker-end="url(#mk-human)"/>
+  <text class="lbl t-human" x="544" y="330" text-anchor="end">policy · gates</text>
+  <path class="arr c-sym" d="M540,376 C 598,328 650,265 682,192" marker-end="url(#mk-sym)"/>
+  <text class="lbl t-sym" x="800" y="308" text-anchor="end">verdicts · provenance</text>
+</svg>

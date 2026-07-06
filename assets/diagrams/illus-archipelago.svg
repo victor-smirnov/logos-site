@@ -1,0 +1,74 @@
+<svg id="lg-arch" viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Islands of in-distribution competence in an out-of-distribution sea; an iteration initialized near a correct but out-of-distribution target spirals away into the nearest island's fixed point.">
+  <style>
+    #lg-arch .sea    { fill: var(--dg-err, #b5259e); fill-opacity: 0.035; stroke: var(--border, #e6e8ee); stroke-width: 1.5; }
+    #lg-arch .haze   { fill: var(--dg-err, #b5259e); }
+    #lg-arch .isl    { fill: var(--dg-model, #5b4be0); fill-opacity: 0.06; stroke: var(--dg-model, #5b4be0); stroke-width: 1.5; stroke-opacity: 0.8; }
+    #lg-arch .ring   { fill: none; stroke: var(--dg-model, #5b4be0); stroke-width: 1.2; }
+    #lg-arch .fp     { fill: var(--dg-model, #5b4be0); }
+    #lg-arch .traj   { fill: none; stroke: var(--dg-model, #5b4be0); stroke-width: 1.8; stroke-dasharray: 6 5; stroke-linecap: round; }
+    #lg-arch .start  { fill: none; stroke: var(--dg-model, #5b4be0); stroke-width: 1.8; }
+    #lg-arch .target { fill: none; stroke: var(--dg-ok, #2f8f4e); stroke-width: 2.2; stroke-linejoin: round; }
+    #lg-arch .mkf-t  { fill: var(--dg-model, #5b4be0); }
+  </style>
+  <defs>
+    <marker id="mk-traj" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="mkf-t" d="M0,0 L7,3.5 L0,7 Z"/>
+    </marker>
+  </defs>
+
+  <rect class="sea" x="10" y="10" width="880" height="480" rx="18"/>
+
+  <!-- OoD haze -->
+  <g>
+    <circle class="haze" cx="390" cy="250" r="2.2" opacity="0.16"/>
+    <circle class="haze" cx="330" cy="320" r="1.8" opacity="0.13"/>
+    <circle class="haze" cx="470" cy="390" r="2"   opacity="0.15"/>
+    <circle class="haze" cx="540" cy="180" r="1.8" opacity="0.13"/>
+    <circle class="haze" cx="640" cy="90"  r="2"   opacity="0.14"/>
+    <circle class="haze" cx="740" cy="230" r="2.2" opacity="0.16"/>
+    <circle class="haze" cx="820" cy="320" r="1.8" opacity="0.12"/>
+    <circle class="haze" cx="300" cy="60"  r="1.8" opacity="0.12"/>
+    <circle class="haze" cx="90"  cy="280" r="2"   opacity="0.13"/>
+    <circle class="haze" cx="60"  cy="120" r="1.8" opacity="0.12"/>
+    <circle class="haze" cx="400" cy="450" r="1.8" opacity="0.13"/>
+    <circle class="haze" cx="560" cy="440" r="2"   opacity="0.13"/>
+    <circle class="haze" cx="850" cy="60"  r="1.8" opacity="0.12"/>
+    <circle class="haze" cx="150" cy="330" r="1.6" opacity="0.11"/>
+    <circle class="haze" cx="720" cy="440" r="1.8" opacity="0.12"/>
+    <circle class="haze" cx="490" cy="60"  r="1.6" opacity="0.11"/>
+  </g>
+
+  <!-- Island A -->
+  <path class="isl" d="M 130,175 C 126,138 162,113 202,110 C 247,107 280,133 284,168 C 288,204 252,232 206,235 C 161,238 134,212 130,175 Z"/>
+  <path class="ring" opacity="0.4" d="M 130,175 C 126,138 162,113 202,110 C 247,107 280,133 284,168 C 288,204 252,232 206,235 C 161,238 134,212 130,175 Z" transform="translate(207 172) scale(0.62) translate(-207 -172)"/>
+  <path class="ring" opacity="0.55" d="M 130,175 C 126,138 162,113 202,110 C 247,107 280,133 284,168 C 288,204 252,232 206,235 C 161,238 134,212 130,175 Z" transform="translate(207 172) scale(0.32) translate(-207 -172)"/>
+  <circle class="fp" cx="207" cy="172" r="4.5"/>
+
+  <!-- Island B (landing) -->
+  <path class="isl" d="M 505,295 C 500,245 555,205 625,202 C 692,199 740,240 744,292 C 748,345 695,388 622,392 C 552,396 510,348 505,295 Z"/>
+  <path class="ring" opacity="0.4" d="M 505,295 C 500,245 555,205 625,202 C 692,199 740,240 744,292 C 748,345 695,388 622,392 C 552,396 510,348 505,295 Z" transform="translate(624 297) scale(0.62) translate(-624 -297)"/>
+  <path class="ring" opacity="0.55" d="M 505,295 C 500,245 555,205 625,202 C 692,199 740,240 744,292 C 748,345 695,388 622,392 C 552,396 510,348 505,295 Z" transform="translate(624 297) scale(0.32) translate(-624 -297)"/>
+  <circle class="fp" cx="624" cy="297" r="5"/>
+
+  <!-- Island C -->
+  <path class="isl" d="M 385,105 C 383,78 408,58 437,57 C 468,56 490,76 492,101 C 494,127 468,147 436,148 C 406,149 387,131 385,105 Z"/>
+  <path class="ring" opacity="0.45" d="M 385,105 C 383,78 408,58 437,57 C 468,56 490,76 492,101 C 494,127 468,147 436,148 C 406,149 387,131 385,105 Z" transform="translate(438 102) scale(0.45) translate(-438 -102)"/>
+  <circle class="fp" cx="438" cy="102" r="3.5"/>
+
+  <!-- Island D -->
+  <path class="isl" d="M 120,400 C 118,372 145,351 177,350 C 210,349 234,370 236,396 C 238,423 210,444 176,445 C 144,446 122,427 120,400 Z"/>
+  <path class="ring" opacity="0.45" d="M 120,400 C 118,372 145,351 177,350 C 210,349 234,370 236,396 C 238,423 210,444 176,445 C 144,446 122,427 120,400 Z" transform="translate(178 397) scale(0.45) translate(-178 -397)"/>
+  <circle class="fp" cx="178" cy="397" r="3.5"/>
+
+  <!-- Island E -->
+  <path class="isl" d="M 745,110 C 744,88 764,72 788,71 C 813,70 831,86 832,106 C 833,127 812,143 786,144 C 762,145 746,131 745,110 Z"/>
+  <path class="ring" opacity="0.45" d="M 745,110 C 744,88 764,72 788,71 C 813,70 831,86 832,106 C 833,127 812,143 786,144 C 762,145 746,131 745,110 Z" transform="translate(788 107) scale(0.45) translate(-788 -107)"/>
+  <circle class="fp" cx="788" cy="107" r="3.5"/>
+
+  <!-- Correct target, out at sea -->
+  <path class="target" d="M 812,423 L 824,435 L 812,447 L 800,435 Z"/>
+
+  <!-- Trajectory: initialized near the target, relaxes into island B -->
+  <circle class="start" cx="778" cy="440" r="5"/>
+  <path class="traj" d="M 771,437 C 730,458 664,444 634,406 C 604,368 560,330 590,301 C 615,277 658,290 652,317 C 648,336 624,332 620,312" marker-end="url(#mk-traj)"/>
+</svg>
