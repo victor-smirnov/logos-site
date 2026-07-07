@@ -283,9 +283,9 @@ export const buildSpecPages = (dataDir) => {
   const sidebar = (currentUrl) => `
 <aside class="sidebar">
   <nav class="sidebar-nav">
-    <div class="api-search">
-      <input id="spec-search-input" type="search" placeholder="Search rules…" autocomplete="off" spellcheck="false" aria-label="Search spec rules">
-      <ul id="spec-search-results" hidden></ul>
+    <div class="api-search" data-search="spec">
+      <input type="search" placeholder="Search rules…" autocomplete="off" spellcheck="false" aria-label="Search spec rules">
+      <ul class="spec-search-results" hidden></ul>
     </div>
     <div class="nav-group">
       <p class="nav-group-title">Specification</p>

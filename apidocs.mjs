@@ -242,9 +242,9 @@ export const buildApiPages = (dataDir) => {
   const sidebar = (currentUrl) => `
 <aside class="sidebar">
   <nav class="sidebar-nav">
-    <div class="api-search">
-      <input id="api-search-input" type="search" placeholder="Search API…" autocomplete="off" spellcheck="false" aria-label="Search API">
-      <ul id="api-search-results" hidden></ul>
+    <div class="api-search" data-search="api">
+      <input type="search" placeholder="Search API…" autocomplete="off" spellcheck="false" aria-label="Search API">
+      <ul class="api-search-results" hidden></ul>
     </div>
     <div class="nav-group">
       <p class="nav-group-title">API Reference</p>

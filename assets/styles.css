@@ -351,17 +351,17 @@ figure.fig-card figcaption { padding: 0 0.25rem; }
   color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
 }
 .api-search input:focus { outline: none; border-color: var(--accent); }
-#api-search-results {
+.api-search-results {
   position: absolute; z-index: 60; top: calc(100% + 4px); left: 0;
   width: 330px; max-width: 76vw; max-height: 340px; overflow-y: auto;
   list-style: none; margin: 0; padding: 0.3rem;
   background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow);
 }
-#api-search-results li a {
+.api-search-results li a {
   display: flex; align-items: baseline; gap: 0.5rem; padding: 0.4rem 0.55rem;
   border-radius: 7px; color: var(--text); font-size: 0.85rem;
 }
-#api-search-results li a:hover, #api-search-results li a.selected { background: var(--accent-soft); text-decoration: none; }
+.api-search-results li a:hover, .api-search-results li a.selected { background: var(--accent-soft); text-decoration: none; }
 .api-search-name { font-family: var(--font-mono); font-size: 0.82rem; white-space: nowrap; }
 .api-search-path { color: var(--text-muted); font-size: 0.72rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .api-search-empty { padding: 0.5rem 0.6rem; color: var(--text-muted); font-size: 0.85rem; }
@@ -412,17 +412,17 @@ figure.fig-card figcaption { padding: 0 0.25rem; }
 .spec-rule-count { color: var(--text-muted); font-size: 0.8rem; }
 
 /* spec search dropdown (reuses .api-search wrapper + input) */
-#spec-search-results {
+.spec-search-results {
   position: absolute; z-index: 60; top: calc(100% + 4px); left: 0;
   width: 360px; max-width: 80vw; max-height: 360px; overflow-y: auto;
   list-style: none; margin: 0; padding: 0.3rem;
   background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow);
 }
-#spec-search-results li a {
+.spec-search-results li a {
   display: flex; flex-direction: column; gap: 0.1rem; padding: 0.4rem 0.55rem;
   border-radius: 7px; color: var(--text);
 }
-#spec-search-results li a:hover, #spec-search-results li a.selected { background: var(--accent-soft); text-decoration: none; }
+.spec-search-results li a:hover, .spec-search-results li a.selected { background: var(--accent-soft); text-decoration: none; }
 .spec-search-id { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); }
 .spec-search-title { font-size: 0.78rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 

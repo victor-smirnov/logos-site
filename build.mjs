@@ -313,8 +313,19 @@ const mobileDrawer = ({ url, sidebarHtml }) => {
     </div>`;
   };
 
+  // A search box at the drawer top for the sections that have one — same
+  // class-based widget as the desktop sidebar, wired by the same script.
+  const searchKind = seg === 'spec' || seg === 'api' ? seg : null;
+  const searchBox = searchKind
+    ? `<div class="api-search" data-search="${searchKind}">
+      <input type="search" placeholder="${searchKind === 'spec' ? 'Search rules…' : 'Search API…'}" autocomplete="off" spellcheck="false" aria-label="Search">
+      <ul class="${searchKind}-search-results" hidden></ul>
+    </div>`
+    : '';
+
   return `<aside class="mobile-drawer" aria-label="Site menu">
   <nav class="sidebar-nav">
+    ${searchBox}
     ${sections.map(renderSection).join('\n    ')}
     <div class="nav-group m-section"><a class="m-section-title" href="${SITE.repo}" rel="noopener" target="_blank">GitHub ↗</a></div>
   </nav>
