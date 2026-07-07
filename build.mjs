@@ -13,6 +13,7 @@ import anchor from 'markdown-it-anchor';
 import hljs from 'highlight.js';
 import katexModule from '@vscode/markdown-it-katex';
 import { buildApiPages } from './apidocs.mjs';
+import { buildSpecPages } from './specdocs.mjs';
 
 // CJS/ESM interop: the plugin function may sit one or two `.default` levels deep.
 const katexPlugin = katexModule.default?.default ?? katexModule.default ?? katexModule;
@@ -22,6 +23,7 @@ const CONTENT = join(ROOT, 'content');
 const ASSETS = join(ROOT, 'assets');
 const STATIC = join(ROOT, 'static');
 const DATA_API = join(ROOT, 'data/api');
+const DATA_SPEC = join(ROOT, 'data/spec');
 const OUT = join(ROOT, 'dist');
 
 // ── Site configuration ──────────────────────────────────────────────────────
@@ -30,17 +32,59 @@ const SITE = {
   tagline: 'A compiled, statically-typed systems language built AI-first.',
   url: 'https://logos-lang.dev',
   repo: 'https://github.com/victor-smirnov/logos',
-  // Sidebar navigation for doc pages.
+  // Sidebar navigation for /docs/ pages.
   nav: [
     {
       title: 'Guide',
       items: [
         { text: 'Getting Started', link: '/docs/getting-started/' },
         { text: 'Language Overview', link: '/docs/language-overview/' },
-        { text: 'Writ: code + data', link: '/docs/writ/' },
       ],
     },
   ],
+  // Language-feature sections. Each is its own top-menu entry (like Stdlib),
+  // lives under /<seg>/…, and carries its own left sidebar of sub-pages. The
+  // top-menu link points at the section's first page.
+  features: [
+    {
+      seg: 'writ', text: 'Writ',
+      nav: [{ title: 'Writ', items: [
+        { text: 'Introduction', link: '/writ/introduction/' },
+        { text: 'Tutorial', link: '/writ/tutorial/' },
+        { text: 'Reference', link: '/writ/reference/' },
+      ] }],
+    },
+    {
+      seg: 'deem', text: 'Deem',
+      nav: [{ title: 'Deem', items: [
+        { text: 'Introduction', link: '/deem/introduction/' },
+        { text: 'Tutorial', link: '/deem/tutorial/' },
+        { text: 'Reference', link: '/deem/reference/' },
+      ] }],
+    },
+    {
+      seg: 'trama', text: 'Trama',
+      nav: [{ title: 'Trama', items: [
+        { text: 'Introduction', link: '/trama/introduction/' },
+        { text: 'Tutorial', link: '/trama/tutorial/' },
+        { text: 'Reference', link: '/trama/reference/' },
+      ] }],
+    },
+    {
+      seg: 'hest', text: 'Hest',
+      nav: [{ title: 'Hest', items: [
+        { text: 'Introduction', link: '/hest/introduction/' },
+      ] }],
+    },
+  ],
+};
+
+// The left-sidebar nav for a page URL: a feature section when the URL's first
+// path segment names one, otherwise the default /docs/ guide nav.
+const navForUrl = (url) => {
+  const seg = url.split('/')[1];
+  const feat = SITE.features.find((f) => f.seg === seg);
+  return feat ? feat.nav : SITE.nav;
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -169,6 +213,8 @@ const header = (currentUrl) => `
     <a class="brand" href="/"><span class="brand-mark">Λ</span><span class="brand-name">Logos</span></a>
     <nav class="top-nav">
       <a href="/docs/getting-started/"${currentUrl.startsWith('/docs/') ? ' class="active"' : ''}>Docs</a>
+      <a href="/spec/"${currentUrl.startsWith('/spec/') ? ' class="active"' : ''}>Spec</a>
+      ${SITE.features.map((f) => `<a href="${f.nav[0].items[0].link}"${currentUrl.startsWith('/' + f.seg + '/') ? ' class="active"' : ''}>${esc(f.text)}</a>`).join('\n      ')}
       <a href="/api/"${currentUrl.startsWith('/api/') ? ' class="active"' : ''}>Stdlib</a>
       <a href="/blog/"${currentUrl.startsWith('/blog') ? ' class="active"' : ''}>Blog</a>
       <a href="${SITE.repo}" rel="noopener">GitHub</a>
@@ -187,7 +233,7 @@ const header = (currentUrl) => `
 const sidebar = (currentUrl) => `
 <aside class="sidebar">
   <nav class="sidebar-nav">
-    ${SITE.nav
+    ${navForUrl(currentUrl)
       .map(
         (group) => `
     <div class="nav-group">
@@ -306,7 +352,7 @@ rz.addEventListener('dblclick',function(){sb.style.width='';sb.style.maxWidth=''
 }
 })();</script>
 <main class="doc-main">
-<article class="doc-content${layout === 'api' ? ' api-content' : ''}">
+<article class="doc-content${layout === 'api' ? ' api-content' : ''}${layout === 'spec' ? ' spec-content' : ''}">
 ${body}
 </article>
 ${tocAside(toc)}
@@ -328,7 +374,7 @@ ${tocAside(toc)}
 <meta property="og:url" content="${SITE.url}${url}">
 <link rel="alternate" type="application/rss+xml" title="${SITE.title} Blog" href="/blog/rss.xml">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/styles.css">${katexCss}${layout === 'api' ? '\n<script src="/assets/api-search.js" defer></script>' : ''}
+<link rel="stylesheet" href="/assets/styles.css">${katexCss}${layout === 'api' ? '\n<script src="/assets/api-search.js" defer></script>' : ''}${layout === 'spec' ? '\n<script src="/assets/spec-search.js" defer></script>' : ''}
 <script>${themeBoot}</script>
 </head>
 <body class="layout-${layout}">
@@ -470,6 +516,29 @@ ${rssItems}
     console.log(`  (generated)  →  api/ (${api.pages.length} pages + search index)`);
   }
 
+  // Language spec (from data/spec/*.md + meta.json — see scripts/extract-spec.sh).
+  const spec = buildSpecPages(DATA_SPEC);
+  for (const p of spec.pages) {
+    const html = page({
+      title: p.title,
+      description: p.description,
+      url: p.url,
+      layout: 'spec',
+      body: p.body,
+      toc: p.toc,
+      sidebarHtml: spec.sidebar(p.url),
+    });
+    const dest = join(tmp, p.outFile);
+    mkdirSync(dirname(dest), { recursive: true });
+    writeFileSync(dest, html);
+    sitemap.push(p.url);
+  }
+  if (spec.pages.length) {
+    writeFileSync(join(tmp, 'spec/search-index.json'), JSON.stringify(spec.searchIndex));
+    const commit = spec.meta?.commit ? ` @ ${spec.meta.commit.slice(0, 8)}` : '';
+    console.log(`  (generated)  →  spec/ (${spec.pages.length} pages, ${spec.searchIndex.length} rules${commit})`);
+  }
+
   // Static passthrough + assets.
   if (existsSync(ASSETS)) cpSync(ASSETS, join(tmp, 'assets'), { recursive: true });
   if (existsSync(STATIC)) cpSync(STATIC, tmp, { recursive: true });
@@ -529,7 +598,7 @@ const watchSources = () => {
     clearTimeout(timer);
     timer = setTimeout(() => rebuild(`${relative(ROOT, dir)}/${fname ?? ''} changed`), 120);
   };
-  for (const dir of [CONTENT, ASSETS, STATIC, DATA_API]) {
+  for (const dir of [CONTENT, ASSETS, STATIC, DATA_API, DATA_SPEC]) {
     if (existsSync(dir)) watch(dir, { recursive: true }, onChange(dir));
   }
   // The generator itself can't hot-swap into a running process.

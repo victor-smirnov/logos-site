@@ -114,6 +114,27 @@ git add data/api && git commit
 Run it whenever stdlib doc comments or signatures change, review the diff,
 and commit the updated JSON like any other content.
 
+## Language specification
+
+`/spec/` publishes the normative spec (`logos/docs/spec/*.md`). Each rule cites
+its implementing source via `**Source:**` / `*Evidence:*` lines carrying
+`path#Lstart-Lend` references — the renderer ([`specdocs.mjs`](specdocs.mjs))
+turns every one into a **GitHub blob link pinned to the exact commit** the docs
+were built from (recorded in `data/spec/meta.json`). Rule ids (`type.alias.…`)
+become page anchors; client search ([`assets/spec-search.js`](assets/spec-search.js))
+indexes every rule.
+
+Regenerate the same way — local, explicit; CI only renders:
+
+```bash
+npm run spec:extract   # copies spec + records the commit; set LOGOS_REPO if not ~/devel/logos
+git add data/spec && git commit
+```
+
+> **The recorded commit must be pushed to GitHub** for the Source links to
+> resolve — `spec:extract` warns if `HEAD` isn't on `origin`. Links point at a
+> commit SHA (immutable), so re-running after new Logos commits repoints them.
+
 ## Deployment
 
 Every push to `main` triggers `.github/workflows/deploy.yml`, which builds the
