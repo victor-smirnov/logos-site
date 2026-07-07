@@ -88,7 +88,7 @@ operator state and [Writ](/writ/introduction/) stand on.
 
 LCM is inherently heterogeneous and explicitly supports three computation domains — the same three
 Logos itself plans as first-class language layers (see
-[Language Overview](/docs/language-overview/)):
+[Introduction](/docs/introduction/)):
 
 1. **Generic mixed dataflow and control flow.** Most practical compute- and IO-intensive code,
    runnable on CPUs or specialised hardware.
@@ -451,4 +451,4 @@ OS kernel into the surface.
 
 - [Hest: dataflow as a language feature](/hest/introduction/) — the dataflow aspect LCM physically grounds; HRPC is Hest's first wire member.
 - [Writ: the data substrate](/writ/introduction/) — the relocatable immutable structures that are LCM's shared-memory model.
-- [Language Overview](/docs/language-overview/) — the three compute domains as first-class language layers.
+- [Introduction](/docs/introduction/) — where Logos's data platform sits among its design axes.

@@ -272,4 +272,4 @@ Tutorial and Reference will follow.
 
 - [Deem: the query & reasoning engine](/deem/introduction/) — the incremental Datalog/DBSP engine Hest depends on and reasons with.
 - [Writ: the data substrate](/writ/introduction/) — the immutable persistent structures that *are* LCM's shared memory, and Hest's operator state.
-- [Language Overview](/docs/language-overview/) — where the dataflow aspect sits among Logos's design axes.
+- [Introduction](/docs/introduction/) — where the dataflow aspect sits among Logos's design axes.

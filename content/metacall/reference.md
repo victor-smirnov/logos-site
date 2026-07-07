@@ -156,4 +156,4 @@ For the design rationale behind the unbuilt model, see the repository's ADR 0003
 - [Metacall introduction](/metacall/introduction/) — the conceptual model: metaprograms as ordinary functions, the three surfaces, quote-and-splice, ASTs as Writ maps, and monotonicity.
 - [Metacall tutorial](/metacall/tutorial/) — a progressive, test-driven walk through every construct on this page.
 - [Writ: the data substrate](/writ/introduction/) — the tagged-map format that backs `ExprBlob` / `QuoteItemBlob` / `WritStatic`; Metacall's ASTs are Writ documents.
-- [Deem](/deem/introduction/) and [Trama](/trama/introduction/) — the DSLs built on the 3-arg `#[token_macro]` `resource` form; [Language overview](/docs/language-overview/) for where metaprogramming sits in the language.
+- [Deem](/deem/introduction/) and [Trama](/trama/introduction/) — the DSLs built on the 3-arg `#[token_macro]` `resource` form; [Introduction](/docs/introduction/) for where metaprogramming sits in the language.

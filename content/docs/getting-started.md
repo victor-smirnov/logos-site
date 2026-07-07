@@ -159,6 +159,6 @@ ctest -R arith_i64 --output-on-failure    # run one test by name
 ## Where to next
 
 - [lforge](/docs/lforge/) — the build tool in full: manifest schema, dependencies, and commands.
-- [Language Overview](/docs/language-overview/) — the design axes and what makes Logos distinct.
+- [Introduction](/docs/introduction/) — why Logos exists and what makes it distinct.
 - [Writ: code + data](/writ/introduction/) — the built-in code-and-data substrate.
 - [Source on GitHub](https://github.com/victor-smirnov/logos) — the compiler, stdlib, and full in-repo documentation.

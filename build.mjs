@@ -37,7 +37,7 @@ const SITE = {
     {
       title: 'Guide',
       items: [
-        { text: 'Language Overview', link: '/docs/language-overview/' },
+        { text: 'Introduction', link: '/docs/introduction/' },
         { text: 'Getting Started', link: '/docs/getting-started/' },
         { text: 'lforge', link: '/docs/lforge/' },
       ],

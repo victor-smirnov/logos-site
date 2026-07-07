@@ -9,7 +9,7 @@ Logos now has a proper home: **[logos-lang.dev](https://logos-lang.dev)**. If yo
 ## What's here today
 
 - **[Getting Started](/docs/getting-started/)** — build `logosc`, compile and run your first program.
-- **[Language Overview](/docs/language-overview/)** — the design axes, and how Logos relates to (and diverges from) Rust.
+- **[Introduction](/docs/introduction/)** — why Logos exists, its design axes, and how it relates to (and diverges from) Rust.
 - **[Writ: code + data](/writ/introduction/)** — the substrate that makes Logos more than a Rust-flavored systems language.
 
 The in-repo documentation under [`docs/`](https://github.com/victor-smirnov/logos) remains the source of truth; this site is the curated, readable entry point. More of the spec and internals docs will migrate here over time.

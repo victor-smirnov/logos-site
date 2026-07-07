@@ -127,7 +127,7 @@ It has quietly stopped being true. Commit volumes are growing in ways that headc
 
 Once the primary author of code is a model, a long list of sensible-sounding defaults become miscalibrated. They optimize the comfort of the agent who is no longer doing most of the typing — while the agent who *is* gets feedback formatted as prose, features rationed like sharp knives, and a toolchain that reports its state through a terminal scrollback.
 
-[Logos](/docs/language-overview/) is a systems language built from the opposite starting point, and this series is the reasoning behind it. "AI-first" has become a sticker that means anything from "we have a copilot plugin" to nothing at all. The honest version requires answering a prior question: what do models actually need? Not folklore about prompts — the structural facts: what models can and cannot do, which of their failure modes are permanent architecture and which are this year's weather. That is what this series tries to lay out.
+[Logos](/docs/introduction/) is a systems language built from the opposite starting point, and this series is the reasoning behind it. "AI-first" has become a sticker that means anything from "we have a copilot plugin" to nothing at all. The honest version requires answering a prior question: what do models actually need? Not folklore about prompts — the structural facts: what models can and cannot do, which of their failure modes are permanent architecture and which are this year's weather. That is what this series tries to lay out.
 
 ## Two users, asymmetric strengths
 
