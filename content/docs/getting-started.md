@@ -67,5 +67,5 @@ cd build && ctest --output-on-failure
 ## Where to next
 
 - [Language Overview](/docs/language-overview/) — the design axes and what makes Logos distinct.
-- [Writ: code + data](/docs/writ/) — the built-in code-and-data substrate.
+- [Writ: code + data](/writ/introduction/) — the built-in code-and-data substrate.
 - [Source on GitHub](https://github.com/victor-smirnov/logos) — the compiler, stdlib, and full in-repo documentation.

@@ -46,4 +46,4 @@ logos/
 ## Keep reading
 
 - [Getting Started](/docs/getting-started/) — build and run.
-- [Writ: code + data](/docs/writ/) — the substrate that unifies values and data.
+- [Writ: code + data](/writ/introduction/) — the substrate that unifies values and data.
