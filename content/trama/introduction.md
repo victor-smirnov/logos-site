@@ -13,6 +13,8 @@ resource greet = trama!(name: str){ "Hello {{ name }}" };
 
 That one line declares a resource whose expansion is a real, native Logos function — `greet("Ada")` returns `"Hello Ada"`. Everything interesting about Trama follows from that: the template is not a runtime-loaded file interpreted on every request, it is source the compiler sees, type-checks, and lowers to buffer pushes.
 
+The name is a weaver's word. *Trama* is Spanish and Portuguese — the everyday term across Latin America — for the **weft**: the crosswise threads a loom draws through the fixed warp to make cloth (and, by extension, the woven fabric itself, or the *plot* of a story). The metaphor is exact. A Trama template *is* the loom: the literal text is the warp held fixed, your data is the weft threaded through the `{{ … }}` holes, and a render weaves the two into finished output.
+
 Trama is the sibling of **[Deem](/deem/introduction/)**, Logos's query engine: **Deem answers *what rows*, Trama produces *the output*.** The two are siblings by construction, not by analogy — they share the same embedded expression sublanguage (EL), the same schema'd intermediate representation, the same optimizer passes, and, on the dynamic surface, the same function registry. Where they touch data, they touch it the same way. And like Deem, Trama works over your typed Logos data directly — a [Writ](/writ/introduction/) schema object *or* an ordinary Logos struct — not some separate template data model.
 
 ## Two surfaces
