@@ -108,11 +108,12 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
 .top-nav a:hover, .top-nav a.active { color: var(--text); text-decoration: none; }
 .header-actions { margin-left: auto; display: flex; gap: 0.4rem; }
 .icon-btn {
-  display: grid; place-items: center; width: 36px; height: 36px;
+  display: grid; place-items: center; width: 36px; height: 36px; padding: 0;
   border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
   color: var(--text-muted); font-size: 1.05rem; cursor: pointer; transition: all 0.15s;
   text-decoration: none;
 }
+.icon-btn svg { display: block; } /* drop inline-baseline space so the glyph sits dead-centre */
 .icon-btn:hover { color: var(--text); border-color: var(--accent); text-decoration: none; }
 .menu-only { display: none; }
 
@@ -424,6 +425,17 @@ figure.fig-card figcaption { padding: 0 0.25rem; }
 /* ── Mobile nav ────────────────────────────────────────────────────────── */
 .nav-scrim { display: none; }
 .mobile-drawer { display: none; } /* desktop: never; shown as a drawer on mobile */
+/* mobile drawer nav tree: each section header + its sub-pages inline */
+.mobile-drawer .m-section { margin-bottom: 0.5rem; }
+.mobile-drawer .m-section-title {
+  display: block; padding: 0.45rem 0.7rem; border-radius: 8px;
+  font-weight: 700; font-size: 1rem; color: var(--text);
+}
+.mobile-drawer .m-section-title:hover { background: var(--surface-2); text-decoration: none; }
+.mobile-drawer .m-section-title.active { color: var(--accent); background: var(--accent-soft); }
+.mobile-drawer .m-section > ul { margin: 0.15rem 0 0 1.1rem; padding-left: 0.6rem; border-left: 1px solid var(--border); list-style: none; }
+.mobile-drawer .m-subnav { margin: 0.15rem 0 0 0.4rem; }
+.mobile-drawer .m-subnav .nav-group { margin-bottom: 0.4rem; }
 
 @media (max-width: 1080px) {
   .toc { display: none; }

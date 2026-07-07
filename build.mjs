@@ -275,26 +275,48 @@ const sidebar = (currentUrl) => `
 // sidebar — WebKit/iOS ignores transform on a position:fixed flex item, so the
 // old approach never slid on Safari). Carries the top-level nav on every page,
 // plus this page's section nav (search box stripped to avoid duplicate ids).
-const mobileDrawer = ({ url, layout, sidebarHtml }) => {
-  const sectioned = !(layout === 'home' || layout === 'post' || layout === 'blog-index');
-  let sectionNav = '';
-  if (sectioned) {
-    sectionNav = sidebarHtml
-      ? sidebarHtml
-          .replace(/<div class="[a-z-]*search"[\s\S]*?<\/div>/i, '') // desktop search has ids we can't duplicate
-          .replace(/^[\s\S]*?<nav class="sidebar-nav">/, '')
-          .replace(/<\/nav>\s*<\/aside>\s*$/, '')
-      : navGroupsHtml(navForUrl(url), url);
-  }
+const mobileDrawer = ({ url, sidebarHtml }) => {
+  const seg = url.split('/')[1];
+  // The current api/spec page's own left nav (search box stripped — its ids
+  // can't be duplicated; unwrapped to the bare nav-group markup).
+  const currentSectionNav = sidebarHtml
+    ? sidebarHtml
+        .replace(/<div class="[a-z-]*search"[\s\S]*?<\/div>/i, '')
+        .replace(/^[\s\S]*?<nav class="sidebar-nav">/, '')
+        .replace(/<\/nav>\s*<\/aside>\s*$/, '')
+    : '';
+
+  // One row per top-level section, in bar order. `items` are shown inline so a
+  // sub-page is pickable directly (fixes "land on page 1 with no way forward").
+  // Big/flat sections (spec, stdlib) have no static items — their full nav is
+  // injected under the header only while you're inside them.
+  const sections = [
+    { seg: 'docs', label: 'Docs', href: '/docs/getting-started/', items: SITE.nav.flatMap((g) => g.items) },
+    { seg: 'spec', label: 'Spec', href: '/spec/', items: null },
+    ...SITE.features.map((f) => ({ seg: f.seg, label: f.text, href: f.nav[0].items[0].link, items: f.nav.flatMap((g) => g.items) })),
+    { seg: 'api', label: 'Stdlib', href: '/api/', items: null },
+    { seg: 'blog', label: 'Blog', href: '/blog/', items: null },
+  ];
+
+  const renderSection = (s) => {
+    const active = seg === s.seg;
+    let sub = '';
+    if (s.items) {
+      sub = `\n      <ul>${s.items
+        .map((it) => `<li><a href="${it.link}"${it.link === url ? ' class="active" aria-current="page"' : ''}>${esc(it.text)}</a></li>`)
+        .join('')}</ul>`;
+    } else if (active && currentSectionNav) {
+      sub = `\n      <div class="m-subnav">${currentSectionNav}</div>`; // spec/api: inject full nav in-place
+    }
+    return `<div class="nav-group m-section">
+      <a class="m-section-title${active ? ' active' : ''}" href="${s.href}">${esc(s.label)}</a>${sub}
+    </div>`;
+  };
+
   return `<aside class="mobile-drawer" aria-label="Site menu">
   <nav class="sidebar-nav">
-    <div class="nav-group">
-      <p class="nav-group-title">Navigate</p>
-      <ul>
-        ${topLinks(url).map((l) => `<li><a href="${l.href}"${l.active ? ' class="active"' : ''}>${esc(l.text)}</a></li>`).join('\n        ')}
-        <li><a href="${SITE.repo}" rel="noopener" target="_blank">GitHub ↗</a></li>
-      </ul>
-    </div>${sectionNav}
+    ${sections.map(renderSection).join('\n    ')}
+    <div class="nav-group m-section"><a class="m-section-title" href="${SITE.repo}" rel="noopener" target="_blank">GitHub ↗</a></div>
   </nav>
 </aside>`;
 };
@@ -426,7 +448,7 @@ ${tocAside(toc)}
 </head>
 <body class="layout-${layout}">
 ${header(url)}
-${mobileDrawer({ url, layout, sidebarHtml })}
+${mobileDrawer({ url, sidebarHtml })}
 ${main}
 ${footer()}
 <div class="nav-scrim" data-close-nav></div>
