@@ -29,7 +29,7 @@ const OUT = join(ROOT, 'dist');
 // ── Site configuration ──────────────────────────────────────────────────────
 const SITE = {
   title: 'Logos',
-  tagline: 'A compiled, statically-typed systems language built AI-first.',
+  tagline: 'A compiled, statically-typed systems language built AI/DB-first.',
   url: 'https://logos-lang.dev',
   repo: 'https://github.com/victor-smirnov/logos',
   // Sidebar navigation for /docs/ pages.

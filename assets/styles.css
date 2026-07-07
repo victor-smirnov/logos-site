@@ -129,6 +129,12 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
   border: 1px solid var(--border); border-radius: 999px;
   background: var(--surface); color: var(--text-muted); font-size: 0.82rem; font-weight: 500;
 }
+.hero-badge-preview {
+  border-color: var(--accent); color: var(--accent); font-weight: 600;
+  text-decoration: none; letter-spacing: 0.02em;
+}
+.hero-badge-preview::before { content: "● "; font-size: 0.7em; vertical-align: middle; }
+.hero-badge-preview:hover { background: var(--accent); color: #fff; text-decoration: none; }
 .hero h1 {
   font-size: clamp(2.4rem, 6vw, 4rem); margin: 0 0 1rem; letter-spacing: -0.03em;
   background: linear-gradient(135deg, var(--text), var(--accent));

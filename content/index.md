@@ -1,11 +1,12 @@
 ---
 layout: home
 title: Logos
-description: Logos is a compiled, statically-typed systems programming language built AI-first — with ownership, traits, generics, and Writ, a built-in code+data substrate.
+description: Logos is a compiled, statically-typed systems programming language built AI/DB-first — with ownership, traits, generics, and Writ, a built-in code+data substrate.
 ---
 
 <section class="hero">
-  <span class="hero-badge">Systems language · built AI-first</span>
+  <a class="hero-badge hero-badge-preview" href="/docs/versioning/" title="Logos is in preview — see Versioning">Preview</a>
+  <span class="hero-badge">Systems language · built AI/DB-first</span>
   <h1>The Logos Programming Language</h1>
   <p class="lead">A compiled, statically-typed systems language with ownership, traits, generics, and pattern matching — and <strong>Writ</strong>, a code-and-data substrate built into the grammar itself.</p>
   <div class="hero-cta">
