@@ -52,6 +52,7 @@ const SITE = {
         { text: 'Introduction', link: '/writ/introduction/' },
         { text: 'Tutorial', link: '/writ/tutorial/' },
         { text: 'Reference', link: '/writ/reference/' },
+        { text: 'TinyObjectMap', link: '/writ/tinyobjectmap/' },
         { text: 'Zoned Memory', link: '/writ/zoned-memory/' },
       ] }],
     },

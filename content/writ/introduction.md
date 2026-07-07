@@ -1,9 +1,13 @@
 ---
 title: "Writ: the data substrate"
-description: Writ is Logos's relocatable, schema-aware, tagged data substrate — built into the language, not imported.
+description: "Writ is Logos's lightweight referential object graph over zones — schema-aware, tagged, serialization-free, built into the language rather than imported."
 ---
 
-**Writ** is Logos's data substrate: a relocatable, tagged, schema-aware **generic object graph** — maps, arrays, typed arrays, decimals, strings, and user datatypes as nodes, linked by self-relative references, navigated and reshaped at runtime. It is not a library you `use` from the outside; the `@{…}` / `@[…]` literal forms are part of the grammar, captures are type-checked at sema, view types are tracked by the borrow checker, and module-scope literals fold to read-only data in the binary. The name is Old English *ġewrit* — an authoritative written record; a Writ value **is** that record, because the in-memory bytes *are* the record, not a message about one. (It replaced the earlier codename *Hermes*, which named a messenger — apt for transport, wrong for a format that *holds* data. See ADR 0010, and ADR 0011 for schemas.)
+**Writ** is Logos's data substrate: a lightweight, referential **object graph** built over [zones](/writ/zoned-memory/) — maps, arrays, typed arrays, decimals, strings, and user datatypes as nodes, linked by **self-relative references**, navigated and reshaped at runtime. Because those links are self-relative — an object finds its neighbours by offset, not absolute address — a whole Writ graph is position-independent. It can live directly in an address space **shared between processes**, and it needs **no serialization** to work against external memory or to hand off to an accelerator: the bytes in the container *are* the working representation, not a message you parse into one.
+
+Writ objects are deliberately simple, with a standardized in-memory layout, and they support **no per-object deletion** — a container's memory is reclaimed wholesale by a copying collector ([below](#reclamation-immutability-portability)). And it is not a library you `use` from the outside: the `@{…}` / `@[…]` literal forms are part of the grammar, captures are type-checked at sema, view types are tracked by the borrow checker, and module-scope literals fold to read-only data in the binary.
+
+The name is Old English *ġewrit* — a written record, a *law*. In its day writing was reserved for what was authoritative; a Writ value **is** that record, because the in-memory bytes *are* the record, not a message about one. (It replaced the earlier codename *Hermes*, which named a messenger — apt for transport, wrong for a format that *holds* data. See ADR 0010, and ADR 0011 for schemas.)
 
 Status: **implemented and shipping.**
 
@@ -49,7 +53,7 @@ A `Pod` word is `(value << 8) | ((code & 0x7F) << 1) | 1`: bit 0 is the Pod tag,
 Two properties fall straight out of this word:
 
 - **Absent is null, and null is the zero value.** A null or absent `WAny` decodes to the reading type's zero — `as_i64 → 0`, `as_bool → false`, a Ref accessor → a null ref — never a fault, never an `Option`. This is the sparse-store default that makes a missing map key harmless.
-- **References are position-independent.** A `WAny` has two forms. The *value* form (the plain word, in registers) holds a `Ref` as an absolute pointer. The *at-rest* form — the same word stored in an arena slot — holds a `Ref` as a self-relative delta `target − &slot`. The compiler owns the bridge (`*slot` materialises at-rest→value, `*slot = v` lowers the other way), so a whole graph is relocatable as raw bytes with no pointer rewriting.
+- **References are position-independent.** A `WAny` has two forms: a *value* form (the plain word in registers) that holds a `Ref` as an absolute pointer, and an *at-rest* form (the same word stored in a zone slot) that holds it as a self-relative delta `target − &slot`. The compiler owns the bridge between them, so a whole graph is relocatable as raw bytes with no pointer rewriting — the property [zoned memory](/writ/zoned-memory/) is built to give.
 
 ## Maps, arrays, schemas
 
@@ -60,23 +64,36 @@ Over `WAny`, Writ layers containers:
 - **`WMap<Wu6, WAny>`** — the **TinyObjectMap** (TOM): a fixed-capacity, bitmap-indexed map of up to 52 small keys (`0..51`) → `WAny`, in a 24-byte header. A field lookup is `bitmap & (1 << key)` plus a rank via `popcount` — about what a struct field offset costs, except the field *set* is chosen at runtime. This is the Writ workhorse: **every `logosc` AST node is one.**
 - **`schema`** — a typed *view* over a map-like object. A schema is to a Writ map what a `struct` is to a flat byte layout: the same dotted-field syntax (`p.x`, `p.on = true`), but the backing store is a sparse, self-describing, schema-tagged map. Fields are presence-keyed by a stable code, so the layout is forward/backward compatible — adding a key leaves an old reader valid. A **`schema enum`** is a closed union whose variants are other schemas, discriminated not by a stored tag but by the pointee's own `schema_type_code`.
 
+Schemas are what make Writ **typed where you want it and dynamic where you don't**. Logos supports schemas natively over the map types Writ uses, so you work through a schema — fully type-checked field access — exactly where a shape is known, and drop to raw `WAny` traversal where dynamism is more convenient, over the *same* bytes. And because a schema is a compiler-known contract, the compiler can **elide runtime checks** wherever it can prove a map access is safe, so the typed path costs no more than a struct field would.
+
 The [tutorial](/writ/tutorial/) builds each of these up from a first literal; the [reference](/writ/reference/) gives the grammar and rules.
 
 ## Three serialization modes
 
-One logical document, three interchangeable representations, chosen by consumer need — and any value moves losslessly between all three:
+One logical document, three interchangeable representations, chosen by consumer need — with **different safety guarantees and integrity requirements** — and any value moves losslessly between all three:
 
-- **Zero-copy** — the native in-memory layout. Internal pointers are offsets, so heap, disk, and shared-memory bytes are *the same bytes*: no parse on read. This is what makes storage objects, cross-process IPC, and accelerator offload a pointer hand-off rather than a deserialization.
+- **Zero-serialization** — the native in-memory layout. Internal pointers are offsets, so heap, disk, and shared-memory bytes are *the same bytes*: no parse on read. This is what makes storage objects, cross-process IPC, and accelerator offload a pointer hand-off rather than a deserialization. It trusts its input — the fast path for memory you own.
 - **Binary serial** — a compact, *validated* wire format for network use, so a compromised peer cannot hand you a malformed document. HRPC frames Writ this way.
 - **SDN (String Data Notation)** — the human-readable text form. Every type prints and parses itself; SDN is what you write in `@{…}` literals, what `stringify(root)` emits, and what `parse_writ` consumes.
 
-## Memory: zones and a copying GC
+A Writ container can **check the integrity of its own data**, so a document read back from external memory or the wire can be validated before it is trusted. What Writ deliberately does *not* provide is **versioning**: as a storage format it has no built-in schema-version negotiation — that is left to the operational layer around it (the schema-code compatibility above handles additive field evolution, but format/version policy is the application's to wrap).
 
-A Writ container is internally a **zone** — a multi-segment region where objects never move, so their self-relative offsets stay valid for the zone's whole life. Memory is reclaimed by a **copying / compacting garbage collector** that runs **on demand, not in the background, and runs no destructors** (ZTypes are `!Drop`): to reclaim, walk the reachable set from the root, copy it into a fresh zone, drop the old one. It is cheap because zones are size-bounded, internal references are self-relative (the copy needs no pointer rewriting), and no cross-zone raw pointers exist. Treat a Writ document as a *document*, not a *database* — the sweet spot is roughly 1–10 disk blocks of 4 KB; model larger data as many containers linked by application-level identifiers.
+## Reclamation, immutability, portability
+
+A Writ container lives in a [relocatable zone](/writ/zoned-memory/), and that choice sets its whole memory story. Objects have no destructors and are never freed individually; instead memory is reclaimed by the simplest possible **copying collector** — walk the reachable set from the root and copy it into a *fresh* container, then drop the old one wholesale. There is no in-place free list, no background thread, no per-object bookkeeping: reclamation is just "keep what's still reachable, discard the rest."
+
+Two further properties follow from the self-contained, offset-addressed layout:
+
+- **An immutable mode.** A container can be sealed immutable, giving a read-only document whose bytes never change after construction — the natural form for shared, cached, or embedded data.
+- **Trivially portable.** Because a container holds no absolute pointers and no OS handles, it **moves freely between threads**, and even **between runtimes** — hand off the bytes and the receiver has the live graph, no rehydration.
+
+Treat a Writ document as a *document*, not a *database* — the sweet spot is roughly 1–10 disk blocks of 4 KB; model larger data as many containers linked by application-level identifiers.
 
 ## Where Writ sits in Logos
 
-Writ is the layer everything structured rests on. It is Logos's carrier for **metadata and RTTI** — reflection data is emitted as zero-serialized Writ blobs in `.rodata`, so `reflect::<T>()` is a pointer dereference, not a parse. And Logos dogfoods it at the deepest level: **the compiler's own IR is Writ.** `logosc`'s AST and LIR are Writ object graphs — every AST node is a TinyObjectMap with a `CODE` discriminant and typed children — and a compiled library embeds its AST as zero-serialized Writ that the compiler `mmap`s back with no parse. Because the TOM layout is byte-identical across C++ and Logos, a metaprogram written in Logos can construct IR the C++ compiler consumes with no marshalling boundary. The higher-level query and transformation surfaces — Deem and Trama — operate over Writ graphs as their common substrate.
+Because of these properties, Writ is the carrier for **everything structured the compiler produces.** Reflection data and **RTTI** are emitted as zero-serialized Writ blobs embedded in `.rodata`, so `reflect::<T>()` is a pointer dereference, not a parse — and the same mechanism carries any embedded document a program wants to ship inside its binary. Logos dogfoods it at the deepest level: **the compiler's own IR is Writ.** `logosc`'s AST and LIR are Writ object graphs — every AST node is a TinyObjectMap with a `CODE` discriminant and typed children. A **library is distributed as its AST** (plus partial sema / mono lowering) combined into a single module *alongside* its object or machine code; the compiler `mmap`s that Writ back with no parse. This is what lets `logosc` be a genuinely **heterogeneous compiler.** It has C++ components — the parser, sema, mono, and codegen — *and* Logos components, notably the [metaprograms](/metacall/introduction/) (`metacall`) that run at compile time. Because the TOM layout is byte-identical across the two languages, all of these components operate on the **same in-memory data structure**, with no marshalling boundary anywhere between them: a metaprogram written in Logos constructs IR the C++ back end consumes directly. In practice this is enormously convenient — one representation, read and written by both halves of the compiler.
+
+That same self-contained representation points at a future direction: because a Writ graph is position-independent and needs no serialization, the compiler's internal structures can be **persisted to a database** and read back as live graphs — the basis for **heterogeneous, distributed build pipelines** where stages of compilation are stored, queried, and resumed rather than recomputed. The higher-level query and transformation surfaces — [Deem](/deem/introduction/) and [Trama](/trama/introduction/) — already operate over Writ graphs as their common substrate.
 
 ## Related
 
