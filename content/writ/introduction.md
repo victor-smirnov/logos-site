@@ -32,12 +32,10 @@ The whole substrate rests on `WAny`, the Writ heterogeneous slot: a single 8-byt
   <text class="wf-l" x="0" y="16">Pod — inline primitive (bit 0 = 1)</text>
   <rect class="wf-p" x="0" y="26" width="120" height="40" rx="4"/>
   <rect class="wf-b" x="120" y="26" width="120" height="40" rx="4"/>
-  <rect class="wf-p" x="240" y="26" width="60" height="40" rx="4"/>
   <text class="wf-t" x="60" y="51" text-anchor="middle">1</text>
   <text class="wf-t" x="180" y="51" text-anchor="middle">7-bit code</text>
-  <text class="wf-t" x="270" y="51" text-anchor="middle">1</text>
-  <rect class="wf-b" x="300" y="26" width="340" height="40" rx="4"/>
-  <text class="wf-t" x="470" y="51" text-anchor="middle">56-bit signed value</text>
+  <rect class="wf-b" x="240" y="26" width="400" height="40" rx="4"/>
+  <text class="wf-t" x="440" y="51" text-anchor="middle">56-bit signed value</text>
   <text class="wf-l" x="0" y="112">Ref — pointer to a tagged object (bit 0 = 0, word ≠ 0)</text>
   <rect class="wf-r" x="0" y="122" width="640" height="40" rx="4"/>
   <text class="wf-t" x="320" y="147" text-anchor="middle">absolute address → &nbsp;<tspan class="wf-tag">[tag]</tspan>&nbsp; object bytes</text>
