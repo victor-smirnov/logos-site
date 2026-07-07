@@ -302,5 +302,9 @@ export const buildSpecPages = (dataDir) => {
   </nav>
 </aside>`;
 
-  return { pages, sidebar, searchIndex, meta };
+  // Flat nav (Overview + every doc) for the mobile drawer, which needs the
+  // list available on every page — not just while inside /spec/.
+  const navItems = [{ text: 'Overview', link: '/spec/' }, ...docs.map((d) => ({ text: d.shortTitle, link: specUrl(d.slug) }))];
+
+  return { pages, sidebar, searchIndex, meta, navItems };
 };

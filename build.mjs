@@ -275,10 +275,19 @@ const sidebar = (currentUrl) => `
 // sidebar — WebKit/iOS ignores transform on a position:fixed flex item, so the
 // old approach never slid on Safari). Carries the top-level nav on every page,
 // plus this page's section nav (search box stripped to avoid duplicate ids).
+// Populated by build() from buildSpecPages — the spec doc list, so the drawer's
+// Spec section is filled on EVERY page (not only while inside /spec/).
+let specDrawerNav = [];
+
+const searchWidget = (kind) => `<div class="api-search" data-search="${kind}">
+        <input type="search" placeholder="${kind === 'spec' ? 'Search rules…' : 'Search API…'}" autocomplete="off" spellcheck="false" aria-label="Search">
+        <ul class="${kind}-search-results" hidden></ul>
+      </div>`;
+
 const mobileDrawer = ({ url, sidebarHtml }) => {
   const seg = url.split('/')[1];
-  // The current api/spec page's own left nav (search box stripped — its ids
-  // can't be duplicated; unwrapped to the bare nav-group markup).
+  // The current api/stdlib page's own left nav (search stripped, unwrapped),
+  // injected under its header only while you're inside it (big flat sections).
   const currentSectionNav = sidebarHtml
     ? sidebarHtml
         .replace(/<div class="[a-z-]*search"[\s\S]*?<\/div>/i, '')
@@ -286,46 +295,37 @@ const mobileDrawer = ({ url, sidebarHtml }) => {
         .replace(/<\/nav>\s*<\/aside>\s*$/, '')
     : '';
 
-  // One row per top-level section, in bar order. `items` are shown inline so a
-  // sub-page is pickable directly (fixes "land on page 1 with no way forward").
-  // Big/flat sections (spec, stdlib) have no static items — their full nav is
-  // injected under the header only while you're inside them.
+  // One row per section, in bar order. `items` render inline so any sub-page is
+  // pickable from anywhere. Spec carries its (small) doc list + its search on
+  // every page; Stdlib is large, so it stays a link and injects its nav + search
+  // only while you're inside it.
   const sections = [
     { seg: 'docs', label: 'Docs', href: '/docs/getting-started/', items: SITE.nav.flatMap((g) => g.items) },
-    { seg: 'spec', label: 'Spec', href: '/spec/', items: null },
+    { seg: 'spec', label: 'Spec', href: '/spec/', items: specDrawerNav, search: 'spec' },
     ...SITE.features.map((f) => ({ seg: f.seg, label: f.text, href: f.nav[0].items[0].link, items: f.nav.flatMap((g) => g.items) })),
-    { seg: 'api', label: 'Stdlib', href: '/api/', items: null },
+    { seg: 'api', label: 'Stdlib', href: '/api/', items: null, search: 'api' },
     { seg: 'blog', label: 'Blog', href: '/blog/', items: null },
   ];
 
   const renderSection = (s) => {
     const active = seg === s.seg;
-    let sub = '';
-    if (s.items) {
-      sub = `\n      <ul>${s.items
+    let inner = '';
+    if (s.search === 'spec') inner += `\n      ${searchWidget('spec')}`; // always searchable
+    else if (s.search === 'api' && active) inner += `\n      ${searchWidget('api')}`; // searchable while inside
+    if (s.items && s.items.length) {
+      inner += `\n      <ul>${s.items
         .map((it) => `<li><a href="${it.link}"${it.link === url ? ' class="active" aria-current="page"' : ''}>${esc(it.text)}</a></li>`)
         .join('')}</ul>`;
     } else if (active && currentSectionNav) {
-      sub = `\n      <div class="m-subnav">${currentSectionNav}</div>`; // spec/api: inject full nav in-place
+      inner += `\n      <div class="m-subnav">${currentSectionNav}</div>`;
     }
     return `<div class="nav-group m-section">
-      <a class="m-section-title${active ? ' active' : ''}" href="${s.href}">${esc(s.label)}</a>${sub}
+      <a class="m-section-title${active ? ' active' : ''}" href="${s.href}">${esc(s.label)}</a>${inner}
     </div>`;
   };
 
-  // A search box at the drawer top for the sections that have one — same
-  // class-based widget as the desktop sidebar, wired by the same script.
-  const searchKind = seg === 'spec' || seg === 'api' ? seg : null;
-  const searchBox = searchKind
-    ? `<div class="api-search" data-search="${searchKind}">
-      <input type="search" placeholder="${searchKind === 'spec' ? 'Search rules…' : 'Search API…'}" autocomplete="off" spellcheck="false" aria-label="Search">
-      <ul class="${searchKind}-search-results" hidden></ul>
-    </div>`
-    : '';
-
   return `<aside class="mobile-drawer" aria-label="Site menu">
   <nav class="sidebar-nav">
-    ${searchBox}
     ${sections.map(renderSection).join('\n    ')}
     <div class="nav-group m-section"><a class="m-section-title" href="${SITE.repo}" rel="noopener" target="_blank">GitHub ↗</a></div>
   </nav>
@@ -454,7 +454,8 @@ ${tocAside(toc)}
 <meta property="og:url" content="${SITE.url}${url}">
 <link rel="alternate" type="application/rss+xml" title="${SITE.title} Blog" href="/blog/rss.xml">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/styles.css">${katexCss}${layout === 'api' ? '\n<script src="/assets/api-search.js" defer></script>' : ''}${layout === 'spec' ? '\n<script src="/assets/spec-search.js" defer></script>' : ''}
+<link rel="stylesheet" href="/assets/styles.css">${katexCss}
+<script src="/assets/spec-search.js" defer></script>${layout === 'api' ? '\n<script src="/assets/api-search.js" defer></script>' : ''}
 <script>${themeBoot}</script>
 </head>
 <body class="layout-${layout}">
@@ -483,6 +484,12 @@ const build = () => {
   const pages = walk(CONTENT).filter((f) => f.endsWith('.md'));
   const sitemap = [];
   const posts = [];
+
+  // Spec is built up front so its doc list is available to the mobile drawer on
+  // every page (the Spec section is populated everywhere, not just under /spec/).
+  const spec = buildSpecPages(DATA_SPEC);
+  specDrawerNav = spec.navItems || [];
+
   for (const src of pages) {
     const srcRel = relative(CONTENT, src).replaceAll('\\', '/');
     const raw = readFileSync(src, 'utf8');
@@ -597,8 +604,7 @@ ${rssItems}
     console.log(`  (generated)  →  api/ (${api.pages.length} pages + search index)`);
   }
 
-  // Language spec (from data/spec/*.md + meta.json — see scripts/extract-spec.sh).
-  const spec = buildSpecPages(DATA_SPEC);
+  // Language spec pages (spec was built above, up front).
   for (const p of spec.pages) {
     const html = page({
       title: p.title,
