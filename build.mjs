@@ -40,6 +40,7 @@ const SITE = {
         { text: 'Introduction', link: '/docs/introduction/' },
         { text: 'Getting Started', link: '/docs/getting-started/' },
         { text: 'lforge', link: '/docs/lforge/' },
+        { text: 'Versioning', link: '/docs/versioning/' },
       ],
     },
   ],
