@@ -423,6 +423,7 @@ figure.fig-card figcaption { padding: 0 0.25rem; }
 
 /* ── Mobile nav ────────────────────────────────────────────────────────── */
 .nav-scrim { display: none; }
+.mobile-drawer { display: none; } /* desktop: never; shown as a drawer on mobile */
 
 @media (max-width: 1080px) {
   .toc { display: none; }
@@ -431,14 +432,17 @@ figure.fig-card figcaption { padding: 0 0.25rem; }
   .menu-only { display: grid; }
   .top-nav { display: none; }
   .doc-main { padding: 1.5rem 1.25rem 3rem; }
-  .sidebar {
-    position: fixed; top: var(--header-h); left: 0; z-index: 40;
-    width: 280px; flex-basis: 280px; background: var(--bg);
-    border-right: 1px solid var(--border); transform: translateX(-100%);
-    transition: transform 0.2s ease;
+  /* the desktop sidebar (a flex item) is replaced on mobile by .mobile-drawer,
+     a fixed element under <body> — reliable transform on WebKit/iOS. */
+  .doc-shell .sidebar, .sb-resizer { display: none; }
+  .mobile-drawer {
+    display: block; position: fixed; top: var(--header-h); left: 0; bottom: 0; z-index: 40;
+    width: min(85vw, 320px); background: var(--bg); border-right: 1px solid var(--border);
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding: 1.25rem 1rem 2rem; transform: translateX(-100%); transition: transform 0.22s ease;
   }
-  body.nav-open .sidebar { transform: translateX(0); box-shadow: var(--shadow); }
-  .sb-resizer { display: none; }
-  body.nav-open .nav-scrim { display: block; position: fixed; inset: var(--header-h) 0 0 0; z-index: 30; background: rgba(0,0,0,0.4); }
+  body.nav-open .mobile-drawer { transform: translateX(0); box-shadow: var(--shadow); }
+  .nav-scrim { cursor: pointer; } /* iOS fires click on divs more reliably with a pointer cursor */
+  body.nav-open .nav-scrim { display: block; position: fixed; inset: var(--header-h) 0 0 0; z-index: 30; background: rgba(0,0,0,0.45); }
   .hero { padding: 3rem 0 2rem; }
 }

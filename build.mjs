@@ -216,16 +216,40 @@ const themeToggleJs = `
 })();
 `;
 
+// Top-level site links — single source for the desktop bar and the mobile drawer.
+const topLinks = (currentUrl) => [
+  { href: '/docs/getting-started/', text: 'Docs', active: currentUrl.startsWith('/docs/') },
+  { href: '/spec/', text: 'Spec', active: currentUrl.startsWith('/spec/') },
+  ...SITE.features.map((f) => ({ href: f.nav[0].items[0].link, text: f.text, active: currentUrl.startsWith('/' + f.seg + '/') })),
+  { href: '/api/', text: 'Stdlib', active: currentUrl.startsWith('/api/') },
+  { href: '/blog/', text: 'Blog', active: currentUrl.startsWith('/blog') },
+];
+
+// Sidebar nav-group list HTML — shared by the desktop sidebar and mobile drawer.
+const navGroupsHtml = (groups, currentUrl) =>
+  groups
+    .map(
+      (group) => `
+    <div class="nav-group">
+      <p class="nav-group-title">${esc(group.title)}</p>
+      <ul>
+        ${group.items
+          .map(
+            (it) =>
+              `<li><a href="${it.link}"${it.link === currentUrl ? ' class="active" aria-current="page"' : ''}>${esc(it.text)}</a></li>`
+          )
+          .join('\n        ')}
+      </ul>
+    </div>`
+    )
+    .join('\n    ');
+
 const header = (currentUrl) => `
 <header class="site-header">
   <div class="header-inner">
     <a class="brand" href="/"><span class="brand-mark">Λ</span><span class="brand-name">Logos</span></a>
     <nav class="top-nav">
-      <a href="/docs/getting-started/"${currentUrl.startsWith('/docs/') ? ' class="active"' : ''}>Docs</a>
-      <a href="/spec/"${currentUrl.startsWith('/spec/') ? ' class="active"' : ''}>Spec</a>
-      ${SITE.features.map((f) => `<a href="${f.nav[0].items[0].link}"${currentUrl.startsWith('/' + f.seg + '/') ? ' class="active"' : ''}>${esc(f.text)}</a>`).join('\n      ')}
-      <a href="/api/"${currentUrl.startsWith('/api/') ? ' class="active"' : ''}>Stdlib</a>
-      <a href="/blog/"${currentUrl.startsWith('/blog') ? ' class="active"' : ''}>Blog</a>
+      ${topLinks(currentUrl).map((l) => `<a href="${l.href}"${l.active ? ' class="active"' : ''}>${esc(l.text)}</a>`).join('\n      ')}
     </nav>
     <div class="header-actions">
       <a href="${SITE.repo}" class="icon-btn" aria-label="GitHub repository" title="GitHub" rel="noopener" target="_blank">
@@ -243,25 +267,37 @@ const header = (currentUrl) => `
 
 const sidebar = (currentUrl) => `
 <aside class="sidebar">
-  <nav class="sidebar-nav">
-    ${navForUrl(currentUrl)
-      .map(
-        (group) => `
-    <div class="nav-group">
-      <p class="nav-group-title">${esc(group.title)}</p>
-      <ul>
-        ${group.items
-          .map(
-            (it) =>
-              `<li><a href="${it.link}"${it.link === currentUrl ? ' class="active" aria-current="page"' : ''}>${esc(it.text)}</a></li>`
-          )
-          .join('\n        ')}
-      </ul>
-    </div>`
-      )
-      .join('\n    ')}
+  <nav class="sidebar-nav">${navGroupsHtml(navForUrl(currentUrl), currentUrl)}
   </nav>
 </aside>`;
+
+// Mobile slide-in drawer: a fixed element directly under <body> (NOT the flex
+// sidebar — WebKit/iOS ignores transform on a position:fixed flex item, so the
+// old approach never slid on Safari). Carries the top-level nav on every page,
+// plus this page's section nav (search box stripped to avoid duplicate ids).
+const mobileDrawer = ({ url, layout, sidebarHtml }) => {
+  const sectioned = !(layout === 'home' || layout === 'post' || layout === 'blog-index');
+  let sectionNav = '';
+  if (sectioned) {
+    sectionNav = sidebarHtml
+      ? sidebarHtml
+          .replace(/<div class="[a-z-]*search"[\s\S]*?<\/div>/i, '') // desktop search has ids we can't duplicate
+          .replace(/^[\s\S]*?<nav class="sidebar-nav">/, '')
+          .replace(/<\/nav>\s*<\/aside>\s*$/, '')
+      : navGroupsHtml(navForUrl(url), url);
+  }
+  return `<aside class="mobile-drawer" aria-label="Site menu">
+  <nav class="sidebar-nav">
+    <div class="nav-group">
+      <p class="nav-group-title">Navigate</p>
+      <ul>
+        ${topLinks(url).map((l) => `<li><a href="${l.href}"${l.active ? ' class="active"' : ''}>${esc(l.text)}</a></li>`).join('\n        ')}
+        <li><a href="${SITE.repo}" rel="noopener" target="_blank">GitHub ↗</a></li>
+      </ul>
+    </div>${sectionNav}
+  </nav>
+</aside>`;
+};
 
 const tocAside = (toc) =>
   toc.length
@@ -390,6 +426,7 @@ ${tocAside(toc)}
 </head>
 <body class="layout-${layout}">
 ${header(url)}
+${mobileDrawer({ url, layout, sidebarHtml })}
 ${main}
 ${footer()}
 <div class="nav-scrim" data-close-nav></div>
