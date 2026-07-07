@@ -31,7 +31,7 @@ become **projections of one model**:
 - **HRPC** ("Hest RPC") — the first *wire member*. Its call model of *N input channels × M output
   channels* is exactly the signature of a dataflow vertex, not an RPC quirk.
 - **The LCM delta-stream** — a planned second wire member, a streaming profile over the same graph.
-- **WQL standing queries** ([Deem](/deem/introduction/)) — the first *client* of the
+- **Deem standing queries** ([Deem](/deem/introduction/)) — the first *client* of the
   dataflow engine.
 
 This is the key reframing to hold onto: **the communication protocols are part of the dataflow
@@ -195,7 +195,7 @@ deductive domain, and it already works and is differentially tested.
 
 ## The engine underneath
 
-Hest depends on, and waits for, the **incremental Datalog / DBSP engine** — the WQL line that
+Hest depends on, and waits for, the **incremental Datalog / DBSP engine** — the reasoning line that
 powers [Deem](/deem/introduction/). That engine plays two roles for Hest:
 
 - **The selector substrate.** Reasoning *about* dataflow — causality, clock discipline,
@@ -256,7 +256,7 @@ To be precise about maturity, because none of this is buildable yet:
   resolution that a deterministic core is a must-have with nondeterminism as an explicit typed
   escape.
 - **Named but not designed:** the only surface committed to is an **entry path** — a static-first
-  metacall such as `flow!{ … }`, modeled on today's `wql!` macro (topology is built at
+  metacall such as `flow!{ … }`, modeled on today's `deem!` macro (topology is built at
   elaboration time, the Chisel model). Proposed **edge types** `Signal⟨T⟩` (present every clock)
   and `Event⟨T⟩` / `Delta⟨T⟩` (discrete occurrence), and a proposed vertex annotation
   `may_suspend`, exist as *names*, nothing more.
@@ -270,6 +270,6 @@ Tutorial and Reference will follow.
 
 ## Related
 
-- [Deem: querying Writ data](/deem/introduction/) — the incremental Datalog/DBSP engine Hest depends on and reasons with.
+- [Deem: the query & reasoning engine](/deem/introduction/) — the incremental Datalog/DBSP engine Hest depends on and reasons with.
 - [Writ: the data substrate](/writ/introduction/) — the immutable persistent structures that *are* LCM's shared memory, and Hest's operator state.
 - [Language Overview](/docs/language-overview/) — where the dataflow aspect sits among Logos's design axes.

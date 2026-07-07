@@ -22,7 +22,7 @@ Metacall exposes three shipping surfaces, all sitting on **one** compile-time JI
 
 1. **The `metacall` keyword** — explicit compile-time evaluation (CTFE). Logos has *no* implicit const-eval; `metacall` is the replacement. `let n: i64 = metacall add(2, 3);` runs `add` in the compiler and splices `5`. It has three expression forms (call, parenthesized-expr, block) and an item form. Reach for it when *you* want to force a value or a batch of items at a specific site.
 
-2. **`#[fn_macro]` and `#[token_macro]`** — the `name!(...)` invocation surface. A `#[fn_macro]` receives its arguments as parsed expression ASTs (`ExprBlob` values); a `#[token_macro]` receives the **raw source bytes between the delimiters as a `str`**, never parsed as Logos. This is how DSLs whose body is not valid Logos are embedded — `deem!`, `wql!`, and `trama!` are all three-argument `#[token_macro]`s.
+2. **`#[fn_macro]` and `#[token_macro]`** — the `name!(...)` invocation surface. A `#[fn_macro]` receives its arguments as parsed expression ASTs (`ExprBlob` values); a `#[token_macro]` receives the **raw source bytes between the delimiters as a `str`**, never parsed as Logos. This is how DSLs whose body is not valid Logos are embedded — `deem!` and `trama!` are both three-argument `#[token_macro]`s.
 
 3. **`#[metaprog_handler("trigger")]`** — derive-style hooks. A handler fires when the compiler scans a user item bearing a matching `#[trigger]` attribute; the handler synthesizes sibling items next to that target. This is how `#[derive_clone]`-style derives are written.
 
@@ -86,7 +86,7 @@ Metaprograms only ever **add** entities; they never mutate or delete existing on
 
 ## Where Metacall sits
 
-Metacall is foundational rather than a corner feature. The `name!(...)` macro surface — including the format family (`println!`, `format!`, …) and every DSL macro — is built on it. In particular, Logos's own query and template DSLs are Metacall clients: `deem!` / `wql!` (see [Deem](/deem/introduction/)) and `trama!` (see [Trama](/trama/introduction/)) are `#[token_macro]`s that take a `resource` binding name, a raw parameter list, and a raw body, and emit a checked native `pub fn` at compile time. When you write a `deem!` query, you are using Metacall.
+Metacall is foundational rather than a corner feature. The `name!(...)` macro surface — including the format family (`println!`, `format!`, …) and every DSL macro — is built on it. In particular, Logos's own query and transformation DSLs are Metacall clients: `deem!` (see [Deem](/deem/introduction/)) and `trama!` (see [Trama](/trama/introduction/)) are `#[token_macro]`s that take a `resource` binding name, a raw parameter list, and a raw body, and emit a checked native `pub fn` at compile time. When you write a `deem!` query, you are using Metacall.
 
 ## What ships, what's designed
 
@@ -101,4 +101,4 @@ Be honest about the boundary, the way the [Writ](/writ/introduction/) docs are a
 - [Metacall tutorial](/metacall/tutorial/) — build up from `metacall add(2, 3)` through item generation, your first `#[fn_macro]` and `#[token_macro]`, the `resource = macro!(...){…}` form, and `gensym`, all from real tests.
 - [Metacall reference](/metacall/reference/) — every form of the `metacall` keyword, the macro signature tables, the `quote_*!` family and antiquotation, `#[metaprog_handler]`, the splice/typing model, the fixpoint, hygiene, and a full status-and-gaps enumeration.
 - [Writ: the data substrate](/writ/introduction/) — the tagged-map format that *is* Metacall's AST representation; ASTs are Writ documents.
-- [Deem](/deem/introduction/) and [Trama](/trama/introduction/) — the query and template DSLs, both built as `#[token_macro]`s on this substrate.
+- [Deem](/deem/introduction/) and [Trama](/trama/introduction/) — the query and transformation DSLs, both built as `#[token_macro]`s on this substrate.

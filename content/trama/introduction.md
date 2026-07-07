@@ -1,11 +1,11 @@
 ---
-title: "Trama: templating Writ data"
-description: Trama is Logos's Jinja2-derived templating language — a typed, compile-checked prepared-render macro plus a dynamic render API, sharing WQL's IR with Deem.
+title: "Trama: the transformation engine"
+description: "Trama is Logos's data-transformation engine — today a typed, compile-checked Jinja2-style templating layer (a prepared-render macro plus a dynamic render API), sharing its schema'd IR with Deem, with further transformation modes to come."
 ---
 
 ## What Trama is
 
-Trama is Logos's template language: you write text with holes in it — `{{ … }}` for a value, `{% … %}` for control flow — and Trama weaves the holes shut against typed data, producing a `String`. Its surface is a deliberate subset of Jinja2, so the syntax will be familiar on sight:
+Trama is Logos's **transformation engine**: it takes typed data and produces an output. Today it has a single mode — **text templating** — and further transformation modes are planned; text is where it starts. In that mode you write text with holes in it — `{{ … }}` for a value, `{% … %}` for control flow — and Trama weaves the holes shut against typed data, producing a `String`. The templating surface is a deliberate subset of Jinja2, so the syntax will be familiar on sight:
 
 ```logos
 resource greet = trama!(name: str){ "Hello {{ name }}" };
@@ -13,7 +13,7 @@ resource greet = trama!(name: str){ "Hello {{ name }}" };
 
 That one line declares a resource whose expansion is a real, native Logos function — `greet("Ada")` returns `"Hello Ada"`. Everything interesting about Trama follows from that: the template is not a runtime-loaded file interpreted on every request, it is source the compiler sees, type-checks, and lowers to buffer pushes.
 
-Trama is one half of **WQL**, Logos's embedded query-and-template subsystem. The other half is **Deem**, the relational query language (`from … where … select …`). The two are siblings by construction, not by analogy: they share the same embedded expression sublanguage (EL), the same Writ-schema intermediate representation, the same optimizer passes, and — on the dynamic surface — the same function registry. Deem answers *what rows*; Trama answers *what text*. Where they touch data, they touch it the same way.
+Trama is the sibling of **[Deem](/deem/introduction/)**, Logos's query engine: **Deem answers *what rows*, Trama produces *the output*.** The two are siblings by construction, not by analogy — they share the same embedded expression sublanguage (EL), the same schema'd intermediate representation, the same optimizer passes, and, on the dynamic surface, the same function registry. Where they touch data, they touch it the same way. And like Deem, Trama works over your typed Logos data directly — a [Writ](/writ/introduction/) schema object *or* an ordinary Logos struct — not some separate template data model.
 
 ## Two surfaces
 
@@ -38,7 +38,7 @@ Trama's constructs are faithful to Jinja2: `{{ expr }}` interpolation, `{% if %}
 
 The departures are all consequences of Logos being a typed, compiled language:
 
-- **Typed params, not an untyped context dict.** Jinja renders against a bag of untyped variables. Trama's parameters are a genuine Logos parameter list — `trama!(u: &User, greeting: str, count: i64)` — re-emitted verbatim so the compiler parses and type-checks them. The params *are* the type source; there is no `with`/`data` header. A parameter whose type is a schema struct is reflected, so `{{ u.name }}` types automatically from the schema.
+- **Typed params, not an untyped context dict.** Jinja renders against a bag of untyped variables. Trama's parameters are a genuine Logos parameter list — `trama!(u: &User, greeting: str, count: i64)` — re-emitted verbatim so the compiler parses and type-checks them. The params *are* the type source; there is no `with`/`data` header. A parameter whose type is a Writ schema struct is reflected, so `{{ u.name }}` types automatically from the schema — and an ordinary Logos struct works the same way through its declared fields.
 - **Compile-time type-checking.** Interpolation routes on the *statically inferred* EL type: a `str` value is pushed as a string, a `bool` renders as the words `true`/`false`, an `f64` formats through the shortest round-trip decimal helper, everything else pushes as `i64`. Jinja decides this dynamically per render; Trama decides it once, at build.
 - **Static fails the build; dynamic returns a value.** This is the inversion worth internalizing. On the static surface an error stops the compiler. On the dynamic surface the identical error is a `QError` you handle in code. Same checker, opposite delivery.
 - **One coupling to expressions.** Every `{{ … }}` and every tag condition is an EL expression — the same CEL-class expression language Deem uses — reached through exactly one edge per statement node (a `WRef<SExpr>`). Trama specifies the *template* layer and delegates all expression semantics to EL.
@@ -55,4 +55,4 @@ You do not need to know this to use Trama. But it is why the two surfaces agree:
 
 - [Trama tutorial](/trama/tutorial/) — build up a template from a first render to loops, conditionals, UDFs, and the dynamic API.
 - [Trama reference](/trama/reference/) — the complete surface: every construct, the type-routing and truthiness tables, and the dynamic API signatures.
-- [Deem: querying Writ data](/deem/introduction/) — the sibling query half of WQL, sharing Trama's EL expression language and Writ IR.
+- [Deem: the query & reasoning engine](/deem/introduction/) — Trama's sibling engine, sharing its EL expression language and schema'd IR.

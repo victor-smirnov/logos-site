@@ -242,6 +242,6 @@ A selected erased field reports its column type as `"dyn"`, and `is_null(r, c)` 
 
 ## Related
 
-- [Deem: querying Writ data](/deem/introduction/) — the concepts behind this tutorial: the two surfaces, EL, Datalog `rel` recursion, and errors-as-values.
+- [Deem: the query & reasoning engine](/deem/introduction/) — the concepts behind this tutorial: the two surfaces, EL, Datalog `rel` recursion, and errors-as-values.
 - [Deem reference](/deem/reference/) — every clause, the exact lowering signatures, the `rel`/stratification rules, and the full dynamic API.
-- [Trama: templating Writ data](/trama/introduction/) — render the data you just queried, using the same EL expressions.
+- [Trama: the transformation engine](/trama/introduction/) — transform the data you just queried; today that means rendering it to text with the same EL expressions.

@@ -174,6 +174,6 @@ Trama's AST is a first-class Writ schema tree (schema category `0x0013`), dogfoo
 
 ## Related
 
-- [Trama: templating Writ data](/trama/introduction/) — the concepts: WQL, the two surfaces, and the Jinja2 lineage.
+- [Trama: the transformation engine](/trama/introduction/) — the concepts: the two surfaces, the Jinja2 lineage, and where Trama is headed.
 - [Trama tutorial](/trama/tutorial/) — a worked build-up from a first render to loops, UDFs, and the dynamic API.
-- [Deem: querying Writ data](/deem/introduction/) — the sibling query half of WQL, sharing Trama's EL expressions, catalog, and `QEnv`.
+- [Deem: the query & reasoning engine](/deem/introduction/) — the sibling engine, sharing Trama's EL expressions, catalog, and `QEnv`.

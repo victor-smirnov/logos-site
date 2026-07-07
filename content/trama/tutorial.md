@@ -177,6 +177,6 @@ For Bob the missing `score` reads as `Null`: `{{ x.score }}` renders empty, `Nul
 
 ## Related
 
-- [Trama: templating Writ data](/trama/introduction/) — the concepts: WQL, the two surfaces, and the Jinja2 lineage.
+- [Trama: the transformation engine](/trama/introduction/) — the concepts: the two surfaces, the Jinja2 lineage, and where Trama is headed.
 - [Trama reference](/trama/reference/) — every construct, the full type-routing and truthiness tables, and the complete dynamic API.
-- [Deem: querying Writ data](/deem/introduction/) — the sibling query half of WQL, sharing the same EL expressions, catalog, and `QEnv`.
+- [Deem: the query & reasoning engine](/deem/introduction/) — the sibling engine, sharing the same EL expressions, catalog, and `QEnv`.

@@ -3,7 +3,7 @@ title: "Deem reference"
 description: The complete Deem surface — static macro grammar and lowering, the clause pipeline, rel/stratification rules, the EL sublanguage, and the dynamic runtime API.
 ---
 
-This is the complete reference for **Deem**, the query domain of WQL. It covers both surfaces: the compile-time `deem!` macro and the runtime `logos.std.deem` API. For orientation see the [introduction](/deem/introduction/); for a worked build-up see the [tutorial](/deem/tutorial/). Where a fact has a canonical home, it is the WQL spec (`docs/spec/wql.md`), whose `wql.*` and `el.*` rule ids are the permanent addresses.
+This is the complete reference for **Deem**, Logos's query and reasoning engine. It covers both surfaces: the compile-time `deem!` macro and the runtime `logos.std.deem` API. For orientation see the [introduction](/deem/introduction/); for a worked build-up see the [tutorial](/deem/tutorial/). Where a fact has a canonical home, it is the query spec (`docs/spec/wql.md`), whose `wql.*` and `el.*` rule ids are the permanent addresses.
 
 ## The static macro
 
@@ -307,7 +307,7 @@ Lenient mode is opt-in per binding; a `WAny`-typed field on a strict schema (an 
 
 Caveats worth stating:
 
-- **ADR 0012** (`0012-writ-query-language.md`) is a **draft/skeleton** — the code has moved ahead of it. Where they differ, the WQL spec (`docs/spec/wql.md`) is authoritative.
+- **ADR 0012** (`0012-writ-query-language.md`) is a **draft/skeleton** — the code has moved ahead of it. Where they differ, the query spec (`docs/spec/wql.md`) is authoritative.
 - Several MVP internals are naïve by design: `select distinct` dedup, the sort, and some join tiers are `O(n²)`. String builtins are ASCII byte-oriented, not Unicode-aware.
 - The spec still refers to the dynamic package as `logos.std.query`; the shipped package is `logos.std.deem`.
 
@@ -319,6 +319,6 @@ Caveats worth stating:
 
 ## Related
 
-- [Deem: querying Writ data](/deem/introduction/) — the conceptual overview: two surfaces, EL, Datalog recursion, errors-as-values.
+- [Deem: the query & reasoning engine](/deem/introduction/) — the conceptual overview: two surfaces, EL, Datalog recursion, errors-as-values.
 - [Deem tutorial](/deem/tutorial/) — a hands-on build-up from a first query through recursion and the dynamic API.
-- [Trama: templating Writ data](/trama/introduction/) — the sibling WQL engine that shares this EL sublanguage and the Writ-schema IR.
+- [Trama: the template engine](/trama/introduction/) — the sibling engine that shares this EL sublanguage and the schema'd IR.

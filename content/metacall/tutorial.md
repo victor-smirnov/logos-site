@@ -249,7 +249,7 @@ fn main() -> i32 {
 }
 ```
 
-This is exactly the shape Logos's own DSLs take. `deem!` / `wql!` (see [Deem](/deem/introduction/)) and `trama!` (see [Trama](/trama/introduction/)) are three-argument `#[token_macro]`s — `pub fn deem(name: str, params: str, body: str) -> ItemList` — invoked as `resource top = deem!(emps: &[Emp], n: i64){ … query … };`. The query text arrives as the raw `body` `str`, the macro parses it with its own grammar, checks it against the row schemas, and emits a native `pub fn`. When you write a `deem!` query, this `resource`/`#[token_macro]` machinery is what runs.
+This is exactly the shape Logos's own DSLs take. `deem!` (see [Deem](/deem/introduction/)) and `trama!` (see [Trama](/trama/introduction/)) are three-argument `#[token_macro]`s — `pub fn deem(name: str, params: str, body: str) -> ItemList` — invoked as `resource top = deem!(emps: &[Emp], n: i64){ … query … };`. The query text arrives as the raw `body` `str`, the macro parses it with its own grammar, checks it against the row schemas, and emits a native `pub fn`. When you write a `deem!` query, this `resource`/`#[token_macro]` machinery is what runs.
 
 There are shorter forms too: the two-argument `(name: str, body: str)` variant (`resource seniors = make_query!{ … };`, no params list) and the plain `(str)` variant. The reference tabulates all of them.
 
