@@ -84,6 +84,7 @@ const SITE = {
       seg: 'hest', text: 'Hest',
       nav: [{ title: 'Hest', items: [
         { text: 'Introduction', link: '/hest/introduction/' },
+        { text: 'LCM — Compute Model', link: '/hest/lcm/' },
       ] }],
     },
   ],
