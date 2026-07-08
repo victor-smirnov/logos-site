@@ -537,6 +537,10 @@ const build = () => {
 <section class="blog-hero">
   <h1>Blog</h1>
   <p>${blogDesc}</p>
+  <a class="rss-link" href="/blog/rss.xml">
+    <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 11a9 9 0 0 1 9 9h2.6A11.6 11.6 0 0 0 4 8.4V11Zm0-6a15 15 0 0 1 15 15h2.6C21.6 11.9 14.1 4.4 4 4.4V5Zm2.5 11.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/></svg>
+    RSS feed
+  </a>
 </section>
 <ul class="post-list">
 ${posts
@@ -565,20 +569,25 @@ ${posts
       (p) => `  <item>
     <title>${esc(p.title)}</title>
     <link>${SITE.url}${p.url}</link>
-    <guid>${SITE.url}${p.url}</guid>
+    <guid isPermaLink="true">${SITE.url}${p.url}</guid>
     <pubDate>${p.date.toUTCString()}</pubDate>
     <description>${esc(p.description)}</description>
   </item>`
     )
     .join('\n');
+  // Newest post drives lastBuildDate; fall back to build time if there are none.
+  const rssBuildDate = (posts[0]?.date ?? new Date()).toUTCString();
   writeFileSync(
     join(tmp, 'blog/rss.xml'),
     `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
   <title>${SITE.title} Blog</title>
   <link>${SITE.url}/blog/</link>
-  <description>${blogDesc}</description>
+  <atom:link href="${SITE.url}/blog/rss.xml" rel="self" type="application/rss+xml" />
+  <description>${esc(blogDesc)}</description>
+  <language>en-us</language>
+  <lastBuildDate>${rssBuildDate}</lastBuildDate>
 ${rssItems}
 </channel>
 </rss>
