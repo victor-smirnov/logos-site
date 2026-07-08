@@ -161,6 +161,9 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
   background: var(--surface); box-shadow: var(--shadow); transition: transform 0.15s, border-color 0.15s;
 }
 .feature:hover { transform: translateY(-2px); border-color: var(--accent); }
+a.feature { display: block; text-decoration: none; color: inherit; }
+a.feature:hover { text-decoration: none; }
+a.feature h3 { color: var(--text); }
 .feature .ico { font-size: 1.5rem; margin-bottom: 0.6rem; }
 .feature h3 { margin: 0 0 0.4rem; font-size: 1.1rem; }
 .feature p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
