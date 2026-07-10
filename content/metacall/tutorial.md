@@ -249,7 +249,7 @@ fn main() -> i32 {
 }
 ```
 
-This is exactly the shape Logos's own DSLs take. `deem!` (see [Deem](/deem/introduction/)) and `trama!` (see [Trama](/trama/introduction/)) are three-argument `#[token_macro]`s — `pub fn deem(name: str, params: str, body: str) -> ItemList` — invoked as `resource top = deem!(emps: &[Emp], n: i64){ … query … };`. The query text arrives as the raw `body` `str`, the macro parses it with its own grammar, checks it against the row schemas, and emits a native `pub fn`. When you write a `deem!` query, this `resource`/`#[token_macro]` machinery is what runs.
+This is exactly the shape Logos's own DSLs take. `trama!` (see [Trama](/trama/introduction/)) is a three-argument `#[token_macro]` — `pub fn trama(name: str, params: str, body: str) -> ItemList` — invoked as `resource greet = trama!(name: str){ … template … };`. And [Deem](/deem/introduction/)'s `deem` / `mapping` **language items** ride the same seam from the other side: the compiler validates the item, reconstructs the canonical `(name, params, body)` text, and dispatches it to a `#[token_macro]` handler of this very shape. The body text arrives as a raw `str`, the handler parses it with its own grammar, checks it, and emits a native fn. When you write a `deem` query or a `trama!` template, this machinery is what runs.
 
 There are shorter forms too: the two-argument `(name: str, body: str)` variant (`resource seniors = make_query!{ … };`, no params list) and the plain `(str)` variant. The reference tabulates all of them.
 
@@ -288,4 +288,4 @@ You have now used all three surfaces — the `metacall` keyword, `#[fn_macro]` /
 
 - [Metacall introduction](/metacall/introduction/) — the concepts behind this tour: metaprograms as ordinary functions, the three surfaces, the quote-and-splice model, and ASTs as Writ maps.
 - [Metacall reference](/metacall/reference/) — complete forms, signature tables, the `quote_*!` family, `#[metaprog_handler]`, the splice/typing model, and the status-and-gaps enumeration.
-- [Deem](/deem/introduction/) and [Trama](/trama/introduction/) — real DSLs built on the `resource = macro!(…){…}` `#[token_macro]` form shown above.
+- [Deem](/deem/introduction/) and [Trama](/trama/introduction/) — real DSLs riding the `#[token_macro]` handler seam shown above (Trama via `resource = trama!(…){…}`, Deem via the `deem`/`mapping` language items).

@@ -18,20 +18,20 @@ description: Logos is a compiled, statically-typed systems programming language 
 
 ```logos
 package graph_reach;
-use logos.std.wql.wql;           // the deem! macro
+use logos.std.wql.wql;           // the deem query engine
 use logos.mem.collections.vec;
 
 struct Edge { pub src: i64, pub dst: i64 }
 
-// A recursive Datalog query, prepared at compile time:
-// transitive reachability over a graph of edges.
-resource reach = deem!(edges: &[Edge], start: i64) {
+// A recursive Datalog query as a language item, prepared at
+// compile time: transitive reachability over a graph of edges.
+pub deem reach(edges: &[Edge], start: i64) {
     rel path(a: i64, b: i64) {
         from edges e select (e.src, e.dst);
         from path p join edges e on p.b == e.src select (p.a, e.dst);
     }
     from path p where p.a == start select p.b order by p.b
-};
+}
 
 fn main() -> i32 {
     let edges: [Edge; 4] = [

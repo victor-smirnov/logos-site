@@ -256,7 +256,7 @@ To be precise about maturity, because none of this is buildable yet:
   resolution that a deterministic core is a must-have with nondeterminism as an explicit typed
   escape.
 - **Named but not designed:** the only surface committed to is an **entry path** — a static-first
-  metacall such as `flow!{ … }`, modeled on today's `deem!` macro (topology is built at
+  metacall such as `flow!{ … }`, modeled on today's `deem` query item (topology is built at
   elaboration time, the Chisel model). Proposed **edge types** `Signal⟨T⟩` (present every clock)
   and `Event⟨T⟩` / `Delta⟨T⟩` (discrete occurrence), and a proposed vertex annotation
   `may_suspend`, exist as *names*, nothing more.
