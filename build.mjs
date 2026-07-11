@@ -41,6 +41,7 @@ const SITE = {
         { text: 'Getting Started', link: '/docs/getting-started/' },
         { text: 'lforge', link: '/docs/lforge/' },
         { text: 'Versioning', link: '/docs/versioning/' },
+        { text: 'Roadmap', link: '/docs/roadmap/' },
       ],
     },
   ],
