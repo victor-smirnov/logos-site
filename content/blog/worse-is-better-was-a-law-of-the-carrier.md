@@ -1,7 +1,7 @@
 ---
 title: "Worse Is Better Was a Law of the Carrier"
 description: Gabriel's law held for thirty years because designs spread through human heads — a fixed-bandwidth carrier. The carrier changed, and the selection regime of software design flips sign.
-date: 2026-07-20
+date: 2026-07-14T09:00:00
 ---
 
 *Part 8 of **Code in the AI-Primary Era**. Previous: [Attention Is the Budget](/blog/attention-is-the-budget/). This part opens a closing arc: what the new authorship regime does to software design itself.*

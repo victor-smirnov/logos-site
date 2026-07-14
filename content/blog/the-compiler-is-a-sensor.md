@@ -1,7 +1,7 @@
 ---
 title: "The Compiler Is a Sensor"
 description: The ceiling on language strictness was never technical — it was emotional. The new primary author of code has no feelings to protect, and that repeals a fifty-year-old design constraint.
-date: 2026-07-22
+date: 2026-07-14T10:00:00
 ---
 
 *Part 9 of **Code in the AI-Primary Era**. Previous: [Worse Is Better Was a Law of the Carrier](/blog/worse-is-better-was-a-law-of-the-carrier/).*

@@ -1,7 +1,7 @@
 ---
 title: "The Phase Transition"
 description: Model capability on a codebase doesn't grow smoothly — it jumps when accumulated declarative structure crosses a threshold. An observation, a mechanism, and a falsifiable prediction.
-date: 2026-07-24
+date: 2026-07-14T11:00:00
 ---
 
 *Part 10 of **Code in the AI-Primary Era**. Previous: [The Compiler Is a Sensor](/blog/the-compiler-is-a-sensor/). This is the empirical one.*
