@@ -1,7 +1,7 @@
 ---
 title: "One System, One Dynamics"
 description: There is no such thing as model performance on real work — only the performance of the loop that contains the model, the tooling, and a human who signs the result.
-date: 2026-07-16
+date: 2026-07-10T09:00:00
 ---
 
 *Part 6 of **Code in the AI-Primary Era**. Previous: [The Failure Mode Humans Don't Have](/blog/the-failure-mode-humans-dont-have/).*

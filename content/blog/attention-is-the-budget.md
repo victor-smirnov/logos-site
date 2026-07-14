@@ -1,7 +1,7 @@
 ---
 title: "Attention Is the Budget"
 description: Notes for engineering leadership — what AI actually changes about team throughput, and why the scarce resource is now attention, not typing speed.
-date: 2026-07-18
+date: 2026-07-10T10:00:00
 ---
 
 *Part 7 of **Code in the AI-Primary Era**. Previous: [One System, One Dynamics](/blog/one-system-one-dynamics/). This part is written for the people who sign org charts rather than commits; it stands alone if you skip the theory.*
